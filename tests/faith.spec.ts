@@ -81,9 +81,9 @@ test('carrossel recebe foco, mostra progresso e navega com teclado',async ({page
   await expect(card.locator('.faith-reference')).not.toHaveText(initial);
   await expect(card.locator('.faith-progress span')).toBeVisible();
   await page.keyboard.press('End');
-  await expect(card.locator('.faith-pagination')).toContainText('12 de 12');
+  await expect(card.locator('.faith-pagination')).toContainText('18 de 18');
   await page.keyboard.press('Home');
-  await expect(card.locator('.faith-pagination')).toContainText('1 de 12');
+  await expect(card.locator('.faith-pagination')).toContainText('1 de 18');
   await expect(card.getByText(/use ← → para explorar/)).toBeVisible();
 });
 
@@ -92,7 +92,7 @@ test('setas do carrossel não interferem nas entradas de gratidão',async ({page
   await field.fill('Minha gratidão');
   await field.press('ArrowLeft');
   await expect(field).toHaveValue('Minha gratidão');
-  await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 12/);
+  await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 18/);
 });
 
 
