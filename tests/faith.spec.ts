@@ -115,3 +115,59 @@ test('controles da seção Fé oferecem alvos de toque acessíveis no celular', 
   await expect(page.getByRole('button',{name:'Próxima reflexão'})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
 });
+
+test('pesquisa referência bíblica mesmo sem acentos e oferece recuperação sem resultado',async ({page})=>{
+  const input=page.getByRole('searchbox',{name:'Buscar reflexões por tema, palavra ou referência'});
+  await input.fill('Salmo 91');
+  await expect(page.getByTestId('faith-feature')).toContainText('Salmo 91');
+  await expect(page.getByRole('status').filter({hasText:'1 reflexão encontrada'})).toBeVisible();
+  await input.fill('conteudo-impossivel-000');
+  await expect(page.getByText('Nenhuma reflexão encontrada')).toBeVisible();
+  await page.getByRole('button',{name:'Limpar filtros'}).click();
+  await expect(page.getByTestId('faith-feature')).toBeVisible();
+  await input.fill('esperanca');
+  await expect(page.getByTestId('faith-feature')).toBeVisible();
+});
+
+test('plano de cinco dias mantém progresso no IndexedDB após recarga',async ({page})=>{
+  await expect(page.getByRole('heading',{name:'Pequenos passos, um dia de cada vez'})).toBeVisible();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de esperança'})).toHaveAttribute('aria-valuenow','0');
+  await page.getByRole('button',{name:'Concluir dia 1'}).click();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de esperança'})).toHaveAttribute('aria-valuenow','1');
+  await expect(page.getByText('1 de 5 dias concluídos. Você pode ler na ordem que preferir.')).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de esperança'})).toHaveAttribute('aria-valuenow','1');
+  await page.getByRole('button',{name:'Marcar como não concluído o dia 1'}).click();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de esperança'})).toHaveAttribute('aria-valuenow','0');
+});
+
+test('plano abre reflexão correspondente e trilhas são independentes',async ({page})=>{
+  await page.getByRole('button',{name:/Cinco dias de paz/}).click();
+  await page.getByRole('button',{name:'Concluir dia 1'}).click();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de paz'})).toHaveAttribute('aria-valuenow','1');
+  await page.getByRole('button',{name:/Cinco dias de coragem/}).click();
+  await expect(page.getByRole('progressbar',{name:'Progresso do plano Cinco dias de coragem'})).toHaveAttribute('aria-valuenow','0');
+  await page.getByRole('button',{name:/Ler dia 1:/}).click();
+  await expect(page.getByTestId('faith-feature')).toContainText('Isaías 41:10');
+});
+
+test('carrossel responde ao teclado sem rotação automática',async ({page})=>{
+  const feature=page.getByTestId('faith-feature');
+  await feature.focus();
+  const before=await feature.locator('.faith-reference').innerText();
+  await feature.press('ArrowRight');
+  await expect(feature.locator('.faith-reference')).not.toHaveText(before);
+  await feature.press('Home');
+  await expect(feature.locator('.faith-pagination')).toContainText('1 de');
+  await feature.press('End');
+  await expect(feature.locator('.faith-pagination')).toContainText('18 de');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(feature).toBeVisible();
+});
+
+test('responsividade da busca e planos em 360px',async ({page})=>{
+  await page.setViewportSize({width:360,height:780});
+  await page.reload();
+  await expect(page.getByRole('heading',{name:'Pequenos passos, um dia de cada vez'})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThanOrEqual(1);
+});

@@ -179,3 +179,17 @@
   .faith-feature-footer{gap:10px}
   .faith-main-actions{min-width:0;flex-wrap:wrap;justify-content:flex-end}
 }
+
+/* Pesquisa de conteúdos com controle visível e foco acessível */
+.faith-search-box{border:1px solid var(--line);border-radius:var(--radius-lg);padding:15px 17px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.faith-search-box>label{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text);font-weight:710}
+.faith-search-box>label svg{color:var(--primary)}
+.faith-search-control{display:flex;align-items:center;gap:9px;padding:0 11px;border:1px solid var(--line);background:var(--input);border-radius:var(--radius-sm)}
+.faith-search-control>svg{color:var(--muted);flex-shrink:0}
+.faith-search-control input{padding:11px 0;border:0;outline:0;background:transparent}
+.faith-search-control:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.faith-search-control input:focus-visible{outline:0}
+.faith-search-control button{background:none;color:var(--muted);display:grid;place-items:center;width:34px;height:34px;border-radius:8px;flex-shrink:0}
+.faith-search-count{font-size:.73rem;color:var(--muted)}
+.faith-feature:focus-visible{outline:3px solid var(--focus);outline-offset:4px}
+@media(max-width:600px){.faith-search-box{padding:13px}}

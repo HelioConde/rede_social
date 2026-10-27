@@ -50,6 +50,7 @@ export function isValidState(value:unknown):value is SocialData {
    v.profiles.every(p=>p&&typeof p.id==='string'&&typeof p.name==='string') &&
    v.posts.every(p=>p&&typeof p.id==='string'&&typeof p.body==='string') &&
    v.messages.every(m=>m&&typeof m.body==='string') &&
+   (v.readingProgress===undefined||(Array.isArray(v.readingProgress)&&v.readingProgress.length<=100&&v.readingProgress.every(x=>typeof x==='string'&&x.length<=80))) &&
    (v.faithFavorites===undefined||(Array.isArray(v.faithFavorites)&&v.faithFavorites.length<=100&&v.faithFavorites.every(x=>typeof x==='string'))) &&
    (v.gratitudeNotes===undefined||(Array.isArray(v.gratitudeNotes)&&v.gratitudeNotes.length<=100&&v.gratitudeNotes.every(x=>x&&typeof x.id==='string'&&typeof x.body==='string'&&x.body.length<=400&&typeof x.createdAt==='number')));
 }

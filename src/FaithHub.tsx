@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Heart, ArrowLeft, ArrowRight, Sparkles, SunMedium, HandHeart, PenLine, Trash2, Send, CheckCircle2, Palette, ShieldCheck } from 'lucide-react';
+import { BookOpen, Heart, ArrowLeft, ArrowRight, Sparkles, SunMedium, HandHeart, PenLine, Trash2, Send, CheckCircle2, Palette, ShieldCheck, Search, X } from 'lucide-react';
+import { ReadingPlans } from './ReadingPlans';
 import type { GratitudeNote } from './types';
 import { faithEntries, faithPalettes, faithTopics, type FaithPalette, type FaithTopic } from './faith-content';
 import './faith.css';
@@ -8,6 +9,8 @@ type Props={
   palette:FaithPalette;
   onPalette:(palette:FaithPalette)=>void;
   favorites:string[];
+  readingProgress:string[];
+  onToggleReading:(key:string)=>void;
   onFavorite:(id:string)=>void;
   notes:GratitudeNote[];
   onAddNote:(body:string)=>void;
@@ -19,14 +22,20 @@ function localDayIndex(){
   const jan1=new Date(d.getFullYear(),0,1);
   return Math.floor((new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime()-jan1.getTime())/86400000);
 }
-export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote,onDeleteNote,onShare}:Props){
+const normalize=(s:string)=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+export function FaithHub({palette,onPalette,favorites,readingProgress,onToggleReading,onFavorite,notes,onAddNote,onDeleteNote,onShare}:Props){
   const [topic,setTopic]=useState<FaithTopic>('Todos');
+  const [search,setSearch]=useState('');
   const [savedOnly,setSavedOnly]=useState(false);
   const [selected,setSelected]=useState(()=>faithEntries[localDayIndex()%faithEntries.length].id);
   const [note,setNote]=useState('');
   const [showJournal,setShowJournal]=useState(false);
   const [notice,setNotice]=useState('');
-  const filtered=useMemo(()=>faithEntries.filter(v=>(topic==='Todos'||v.topic===topic)&&(!savedOnly||favorites.includes(v.id))),[topic,savedOnly,favorites]);
+  const filtered=useMemo(()=>faithEntries.filter(v=>{
+    const term=normalize(search.trim());
+    const content=normalize([v.ref,v.topic,v.title,v.reflection,v.question].join(' '));
+    return (topic==='Todos'||v.topic===topic)&&(!savedOnly||favorites.includes(v.id))&&(!term||content.includes(term));
+  }),[topic,savedOnly,favorites,search]);
   const active=filtered.find(v=>v.id===selected)||filtered[0];
   const position=active?filtered.findIndex(v=>v.id===active.id):0;
   function navigate(delta:number){
@@ -41,6 +50,10 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
     if(event.key==='Home')setSelected(filtered[0].id);
     else if(event.key==='End')setSelected(filtered[filtered.length-1].id);
     else navigate(event.key==='ArrowRight'?1:-1);
+  }
+  function readFromPlan(id:string){
+    setTopic('Todos');setSavedOnly(false);setSearch('');setSelected(id);
+    document.getElementById('faith-current')?.scrollIntoView({block:'start',behavior:'auto'});
   }
   function addNote(){
     const value=note.trim();
@@ -63,6 +76,11 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
     </div>
 
     <div className="faith-intro-line"><div><span className="faith-kicker"><BookOpen size={15}/> REFLEXÕES PARA O DIA A DIA</span><h2>Encontre uma palavra de inspiração</h2></div><span className="faith-content-note">Conteúdo cristão opcional</span></div>
+    <div className="faith-search-box">
+      <label htmlFor="faith-search"><Search size={17}/> Buscar reflexões por tema, palavra ou referência</label>
+      <div className="faith-search-control"><Search size={18} aria-hidden="true"/><input id="faith-search" type="search" value={search} placeholder="Ex.: Salmo 91, paz, esperança..." onChange={e=>{setSearch(e.target.value);setSelected('')}}/>{search&&<button type="button" aria-label="Limpar busca de reflexões" onClick={()=>setSearch('')}><X size={16}/></button>}</div>
+      <span className="faith-search-count" role="status">{filtered.length} {filtered.length===1?'reflexão encontrada':'reflexões encontradas'}</span>
+    </div>
     <div className="faith-filter-toolbar">
       <div className="faith-topics" role="group" aria-label="Filtrar reflexões por tema">
         {faithTopics.map(t=><button type="button" key={t} className={'faith-topic '+(topic===t?'active':'')} aria-pressed={topic===t} onClick={()=>{setTopic(t);setSelected('')}}>{t}</button>)}
@@ -70,11 +88,11 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
       <button className={'faith-favorite-filter '+(savedOnly?'active':'')} type="button" aria-pressed={savedOnly} onClick={()=>{setSavedOnly(v=>!v);setSelected('')}}><Heart size={17} fill={savedOnly?'currentColor':'none'}/> Salvos <span>{favorites.length}</span></button>
     </div>
 
-    {active?<article className="faith-feature card" data-testid="faith-feature" role="region" aria-roledescription="carrossel"
+    {active?<article id="faith-current" className="faith-feature card" data-testid="faith-feature" role="region" aria-roledescription="carrossel"
       aria-label="Reflexões de fé" aria-describedby="faith-keyboard-hint" tabIndex={0} onKeyDown={keyboardNavigate}>
       <div className="faith-feature-header">
         <span className="faith-day-label"><Sparkles size={15}/> {topic==='Todos'&&!savedOnly?'REFLEXÃO EM DESTAQUE':'REFLEXÃO SELECIONADA'}</span>
-        <span className="faith-pagination" aria-live="polite" aria-atomic="true">{position+1} de {filtered.length}</span>
+        <span className="faith-pagination" aria-live="polite" aria-atomic="true">{position+1} de {filtered.length}: {active.ref}</span>
       </div>
       <div className="faith-progress" aria-hidden="true"><span style={{width:((position+1)/filtered.length*100)+'%'}} /></div>
       <div className="faith-feature-main">
@@ -95,8 +113,9 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
         </div>
       </div>
       <p className="faith-keyboard-hint" id="faith-keyboard-hint">Dica: selecione este cartão e use ← → para explorar, Home para o início e End para o fim.</p>
-    </article>:<div className="card faith-empty"><Heart size={26}/><h3>Nenhuma reflexão salva neste filtro</h3><p>Experimente outro tema ou desative o filtro de favoritos.</p><button type="button" className="btn secondary" onClick={()=>{setSavedOnly(false);setTopic('Todos')}}>Ver todas as reflexões</button></div>}
+    </article>:<div className="card faith-empty"><Search size={26}/><h3>Nenhuma reflexão encontrada</h3><p>Tente outra palavra, tema ou desative o filtro de favoritos.</p><button type="button" className="btn secondary" onClick={()=>{setSavedOnly(false);setTopic('Todos');setSearch('')}}>Limpar filtros</button></div>}
 
+    <ReadingPlans completed={readingProgress} onToggle={onToggleReading} onRead={readFromPlan}/>
     <div className="faith-content-grid">
       <section className="card faith-journal">
         <div className="faith-card-heading"><span className="faith-icon"><PenLine size={23}/></span><div><span className="faith-kicker">UM HÁBITO GENTIL</span><h2>Meu caderno de gratidão</h2></div></div>

@@ -4,6 +4,7 @@ export const starterData = (): SocialData => ({
   version: 1,
   activeId: 'me',
   faithFavorites: [],
+  readingProgress: [],
   gratitudeNotes: [],
   profiles: [
     { id: 'me', name: 'Visitante', handle: 'visitante', bio: 'Bem-vindo à Rede Jovem! Personalize seu espaço e compartilhe suas ideias.', city: 'Brasil', avatar: '', color: '#5271ed' },

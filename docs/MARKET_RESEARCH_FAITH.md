@@ -30,3 +30,15 @@ As três são escolhidas manualmente, guardadas apenas no navegador, e precisam 
 - Rodar testes com usuários voluntários de várias crenças e com pessoas sem religião, sem inferir suas preferências.
 - Comparar navegação, legibilidade, compreensão da distinção entre texto bíblico e reflexão e facilidade de desativar o conteúdo opt-in.
 - Continuar usando o GitHub Pages, sem backend, como DEMO local; não alegar mensagens reais ou interação multiusuário.
+
+## Nova rodada de análise de produto — 27/10/2026
+A investigação anterior também identificou sinais de engajamento em apps bíblicos, como procura por paz, ansiedade e referências de proteção (incluindo o Salmo 91). Isso ajuda a levantar hipóteses de recursos **sem generalizar resultados de um app para toda a população religiosa**.
+
+**Mudanças implementadas a partir das hipóteses:**
+1. Busca sem acentos por referência bíblica, livro, assunto e conteúdo; nenhuma requisição externa.
+2. Seis novas reflexões autorais: Salmo 91, Isaías 40:31, 1 Pedro 5:7, Salmo 46:1, Lamentações 3:22–23 e João 14:27.
+3. Três microplanos temáticos de cinco dias, cada um com progresso local e ação manual de concluir/reabrir o dia.
+4. Carrossel acessível com anúncio de posição e referência, sem autoplay. Respeito a `prefers-reduced-motion`.
+5. Visual responsivo com ações explícitas e sem mensagens que pressionem por engajamento diário.
+
+**Limites:** progresso somente no dispositivo, sem autenticação ou sincronização. Os planos são sugestões editoriais e não recomendações médicas ou aconselhamento religioso profissional. Não há coleta de dados sobre crenças nem testes com participantes reais nesta etapa.

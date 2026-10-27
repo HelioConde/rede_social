@@ -64,3 +64,11 @@ Não existe autenticação real, sincronização ou compartilhamento entre dispo
 ## Alvos de toque — Espaço Fé (27/10/2026)
 - Setas do carrossel, filtros por tema, filtro de salvos, botão Salvar, histórico e exclusão de anotações possuem área interativa mínima de **44×44 px**, inclusive em 360 px de largura.
 - Não alterar a ordem semântica ou a identidade do carrossel para expandir os controles; os testes verificam tamanho e ausência de rolagem horizontal.
+
+## Iteração — pesquisa por conteúdo e microplanos
+- **Taste:** cartões de plano reutilizam `--space-*`, `--radius-lg`, `--line`, `--surface`, `--primary`, `--focus` e o tema existente; nenhum ícone sozinho expressa progresso.
+- **Guidelines:** busca com label real e contador acessível, mensagens vazias recuperáveis, navegação do carrossel por botões e teclado (setas, Home, End), progresso `role=progressbar` nomeado, controle de movimento reduzido.
+- **Awesome Design / Image to Code:** hierarquia editorial de planos, cartões de dias com ações legíveis e responsividade real a 360/390 px, sem usar imagens fixas como interface.
+- **Conteúdo:** 18 referências inspiram reflexões originais. Há três planos temáticos de cinco dias, sem rotina forçada.
+- **Persistência:** `readingProgress?:string[]` é campo opcional da versão 1 do IndexedDB; perfis existentes e backups anteriores permanecem compatíveis.
+- **QA:** verificações Playwright adicionais de busca com/sem acento, sem resultados, carrossel, plano, persistência e largura mobile. O Pages só recebe `dist/` após o build e os testes.

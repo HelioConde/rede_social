@@ -6,7 +6,7 @@ Uma releitura do projeto **Rede Jovem** (2019–2022), agora em **React + TypeSc
 
 ## Recursos
 - Feed: criar, editar, excluir, curtir e comentar publicações.
-- **Espaço Fé (opcional):** 12 referências bíblicas com reflexões autorais, filtros por tema, favoritos, caderno local de gratidão, compartilhamento voluntário e três paletas de cores.
+- **Espaço Fé (opcional):** 18 referências bíblicas com reflexões autorais, filtros por tema, busca por referência e palavra, três planos de cinco dias com progresso local, favoritos, caderno local de gratidão, compartilhamento voluntário e três paletas de cores.
 - Imagens: pré-visualização, validação e compressão no navegador.
 - Perfis: avatar, nome, usuário, biografia e cidade.
 - Amizades: adicionar e aceitar solicitações fictícias.
