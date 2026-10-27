@@ -51,7 +51,9 @@ export function isValidState(value:unknown):value is SocialData {
    v.posts.every(p=>p&&typeof p.id==='string'&&typeof p.body==='string') &&
    v.messages.every(m=>m&&typeof m.body==='string') &&
    (v.faithFavorites===undefined||(Array.isArray(v.faithFavorites)&&v.faithFavorites.length<=100&&v.faithFavorites.every(x=>typeof x==='string'))) &&
-   (v.gratitudeNotes===undefined||(Array.isArray(v.gratitudeNotes)&&v.gratitudeNotes.length<=100&&v.gratitudeNotes.every(x=>x&&typeof x.id==='string'&&typeof x.body==='string'&&x.body.length<=400&&typeof x.createdAt==='number')));
+   (v.gratitudeNotes===undefined||(Array.isArray(v.gratitudeNotes)&&v.gratitudeNotes.length<=100&&v.gratitudeNotes.every(x=>x&&typeof x.id==='string'&&typeof x.body==='string'&&x.body.length<=400&&typeof x.createdAt==='number'))) &&
+   (v.readingProgress===undefined||(v.readingProgress!==null&&typeof v.readingProgress==='object'&&!Array.isArray(v.readingProgress)&&Object.entries(v.readingProgress).length<=12&&
+     Object.entries(v.readingProgress).every(([key,val])=>key.length<=60&&Array.isArray(val)&&val.length<=30&&val.every(id=>typeof id==='string'&&id.length<=90))));
 }
 export function downloadBackup(data:SocialData) {
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});

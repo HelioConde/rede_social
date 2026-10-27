@@ -36,7 +36,7 @@ Modernizar o projeto histórico **Rede Jovem**, arquivado em `legacy/php-2026102
 - Foco visível com 3 px de contorno em teclado; ligação "Pular para conteúdo".
 - `aria-live` para avisos e conversas; `aria-pressed` em filtros e curtidas.
 - `prefers-reduced-motion: reduce` desativa animações/transições e rolagem suave.
-- O feed preserva navegação convencional; o **Espaço Fé** possui um carrossel editorial real com região focável, setas nomeadas, `aria-live`, Home/End e movimento reduzido.
+- O Espaço Fé possui carrossel editorial com teclado, feedback de status e controles explícitos.
 
 ## Image to Code
 A linguagem visual referencia a arquitetura do projeto PHP antigo, mas reconstrói suas telas em componentes React, evitando imagens de layout como substituto de conteúdo. O fundo legado é usado somente na capa do perfil.
@@ -54,12 +54,13 @@ Não existe autenticação real, sincronização ou compartilhamento entre dispo
 - Carrossel de reflexões com controles Anterior/Próxima nomeados, aria-live para avisos e suporte a movimento reduzido.
 - Pesquisas, limites metodológicos e fontes em `docs/MARKET_RESEARCH_FAITH.md`.
 
-## Polimento do Espaço Fé — navegação (27/10/2026)
-- Cartão de reflexão é uma região focável com `aria-roledescription="carrossel"` e instrução de teclado associada.
-- `ArrowLeft/ArrowRight` percorrem os itens; `Home/End` saltam para início/fim, sem capturar eventos de campos ou botões internos.
-- Indicador visual de progresso atualizado com a posição selecionada; numeração com anúncio discreto em `aria-live`.
-- Progressão é instantânea quando o sistema solicita movimento reduzido.
-- Playwright valida posição, teclado e interferência zero com o caderno de gratidão.
+## Outubro de 2026 — leitura guiada e descoberta
+- Novos tokens locais de `faith.css` mantêm os três temas sem classificar visitantes por fé.
+- Campo de busca por referência, título e tema com normalização de acentos; `type=search` e rótulo.
+- Navegador de reflexões sem autoplay: Anterior/Próxima + anúncio de referência em `aria-live=polite`; rotação automática evitada conforme recomendações W3C/WAI.
+- Planos de sete etapas com progresso local no IndexedDB, descrição acessível e estado sem obrigatoriedade de leitura diária.
+- Novas reflexões autorais inspiradas em Salmo 91, Salmo 46, João 14:27, Lamentações 3:22–23, Tiago 1:5 e Salmo 34:18.
+- Novo relatório: `docs/RESEARCH_RELIGIOUS_DIGITAL_2026.md`.
 
 ## Alvos de toque — Espaço Fé (27/10/2026)
 - Setas do carrossel, filtros por tema, filtro de salvos, botão Salvar, histórico e exclusão de anotações possuem área interativa mínima de **44×44 px**, inclusive em 360 px de largura.

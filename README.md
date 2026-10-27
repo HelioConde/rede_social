@@ -42,3 +42,8 @@ O PHP original foi preservado na branch **`legacy/php-20261027`**; a branch publ
 O legado PHP utilizava `mysql_*`, queries com dados não confiáveis e senhas sem hash, e **não deve ser reativado em produção**. Para uma rede social real, é necessário backend e autenticação com controles de acesso próprios.
 
 Consulte `docs/DESIGN_SYSTEM.md` para design e acessibilidade e `docs/MARKET_RESEARCH_FAITH.md` para dados, fontes, limites e hipóteses de cores.
+
+### Atualização de outubro de 2026 — jornadas de leitura
+O Espaço Fé recebeu busca por referências e assuntos, seis reflexões adicionais e três planos opcionais de sete etapas (paz, esperança e coragem). Marcação de leitura e retomada funcionam pelo armazenamento local e pelos backups JSON já existentes. Não há contagem de dias consecutivos nem contas reais.
+
+Veja `docs/RESEARCH_RELIGIOUS_DIGITAL_2026.md` para as fontes do YouVersion, Pew e W3C. Os percentuais de apps bíblicos descrevem seus usuários, não a população geral.

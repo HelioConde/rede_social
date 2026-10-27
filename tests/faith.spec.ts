@@ -71,6 +71,48 @@ test('convite ao Espaço Fé não espreme conteúdo no feed mobile',async ({page
   await expect(page.getByRole('heading',{name:/Uma pausa para a alma/})).toBeVisible();
 });
 
+test('busca encontra Salmo 91 sem depender de acento',async ({page})=>{
+  const search=page.getByRole('searchbox',{name:'Pesquisar referências e reflexões'});
+  await search.fill('salmo 91');
+  await expect(page.getByTestId('faith-feature')).toContainText('Salmo 91:1–4');
+  await search.fill('sabedoria');
+  await expect(page.getByTestId('faith-feature')).toContainText('Tiago 1:5');
+  await search.fill('referencia inventada 123');
+  await expect(page.getByText('Nenhuma reflexão encontrada')).toBeVisible();
+  await page.getByRole('button',{name:'Limpar busca de reflexões'}).click();
+  await expect(page.getByTestId('faith-feature')).toBeVisible();
+});
+test('leitura guiada persiste, permite rever e exporta progresso',async ({page})=>{
+  const plans=page.getByTestId('reading-plans');
+  await expect(plans.getByRole('heading',{name:'Planos de reflexão em 7 dias'})).toBeVisible();
+  const progress=plans.getByRole('progressbar',{name:/Progresso do plano/});
+  await expect(progress).toHaveAttribute('aria-valuenow','0');
+  await plans.getByRole('button',{name:/Concluir dia 1 do plano 7 dias para encontrar paz/}).click();
+  await expect(progress).toHaveAttribute('aria-valuenow','1');
+  await page.reload();
+  await expect(progress).toHaveAttribute('aria-valuenow','1');
+  await plans.getByRole('button',{name:/Ler reflexão/}).first().click();
+  await expect(page.getByTestId('faith-feature')).toContainText('Filipenses 4:6–7');
+  await plans.getByRole('button',{name:/Desmarcar dia 1 do plano/}).click();
+  await expect(progress).toHaveAttribute('aria-valuenow','0');
+});
+test('navegação manual do carrossel funciona com setas do teclado',async ({page})=>{
+  const card=page.getByTestId('faith-feature');
+  await card.focus();
+  const old=await card.locator('.faith-reference').textContent();
+  await page.keyboard.press('ArrowRight');
+  await expect(card.locator('.faith-reference')).not.toHaveText(old||'');
+  await expect(card.locator('.faith-pagination')).toHaveAttribute('aria-live','polite');
+});
+test('planos sem overflow em 360px e movimento reduzido',async ({page})=>{
+  await page.setViewportSize({width:360,height:780});
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.goto('/rede_social/#faith');
+  await expect(page.getByTestId('reading-plans')).toBeVisible();
+  await page.getByRole('button',{name:/7 dias de esperança/}).click();
+  await expect(page.getByRole('progressbar',{name:/7 dias de esperança/})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThanOrEqual(1);
+});
 
 test('carrossel recebe foco, mostra progresso e navega com teclado',async ({page})=>{
   const card=page.getByTestId('faith-feature');
@@ -81,9 +123,9 @@ test('carrossel recebe foco, mostra progresso e navega com teclado',async ({page
   await expect(card.locator('.faith-reference')).not.toHaveText(initial);
   await expect(card.locator('.faith-progress span')).toBeVisible();
   await page.keyboard.press('End');
-  await expect(card.locator('.faith-pagination')).toContainText('12 de 12');
+  await expect(card.locator('.faith-pagination')).toContainText('18 de 18');
   await page.keyboard.press('Home');
-  await expect(card.locator('.faith-pagination')).toContainText('1 de 12');
+  await expect(card.locator('.faith-pagination')).toContainText('1 de 18');
   await expect(card.getByText(/use ← → para explorar/)).toBeVisible();
 });
 
@@ -92,7 +134,7 @@ test('setas do carrossel não interferem nas entradas de gratidão',async ({page
   await field.fill('Minha gratidão');
   await field.press('ArrowLeft');
   await expect(field).toHaveValue('Minha gratidão');
-  await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 12/);
+  await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 18/);
 });
 
 

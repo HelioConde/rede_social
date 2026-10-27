@@ -154,8 +154,65 @@
   .faith-quick button{grid-column:1/-1;grid-row:2;margin-left:0;width:100%;justify-content:center;white-space:normal}
 }
 
-/* Image to Code: carrossel editorial com trilho de progresso e navegação acessível. */
-.faith-feature:focus-visible{outline:3px solid var(--focus);outline-offset:4px}
+/* Research 2026 — encontrabilidade e jornadas curtas */
+.faith-search{display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:0 14px;min-height:49px;color:var(--muted)}
+.faith-search:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.faith-search input{background:none;border:0;outline:0;padding:12px 0;min-height:47px;flex:1;font-size:.84rem}
+.faith-search input:focus-visible{outline:0}
+.faith-search button{color:var(--muted);display:grid;place-items:center;min-height:34px;min-width:34px;border-radius:9px;background:none}
+.faith-search button:hover{background:var(--surface-hover)}
+.faith-feature:focus{outline:2px solid var(--focus);outline-offset:4px}
+.faith-plans{display:flex;flex-direction:column;gap:14px;margin-top:5px}
+.faith-plans-heading{display:flex;align-items:center;gap:13px}
+.faith-plans-heading-icon{background:var(--nav-active);color:var(--primary);border-radius:14px;width:48px;height:48px;flex:0 0 48px;display:grid;place-items:center}
+.faith-plans-heading h2{font-size:1.23rem;letter-spacing:-.025em;margin-top:5px}
+.faith-plans-heading p{font-size:.78rem;line-height:1.65;color:var(--muted);margin-top:6px}
+.faith-plan-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.faith-plan-tab{background:var(--surface);border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;gap:7px;border-radius:12px;padding:14px 13px;color:var(--text);min-width:0}
+.faith-plan-tab:hover{background:var(--surface-hover)}
+.faith-plan-tab.selected{border-color:var(--primary);background:var(--nav-active)}
+.faith-plan-tab strong{font-size:.82rem;line-height:1.35}
+.faith-plan-tab span{font-size:.72rem;color:var(--muted)}
+.faith-plan-detail{padding:22px 24px}
+.faith-plan-detail-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.faith-plan-detail-head h3{margin:5px 0 5px;font-size:1.08rem}
+.faith-plan-detail-head p{color:var(--muted);font-size:.81rem;line-height:1.6}
+.faith-plan-count{flex-shrink:0;color:var(--primary);font-weight:800;font-size:1.1rem;letter-spacing:-.025em;padding:10px;background:var(--nav-active);border-radius:12px}
+.faith-progress-track{height:8px;background:var(--surface-raised);border-radius:100px;overflow:hidden;margin:17px 0 11px;border:1px solid var(--line)}
+.faith-progress-track>span{display:block;height:100%;background:var(--primary);border-radius:100px;transition:width .25s ease}
+.faith-days{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.faith-day{display:flex;align-items:flex-start;gap:13px;padding:15px 2px;border-bottom:1px solid var(--line)}
+.faith-day:last-child{border-bottom:0}
+.faith-day-number{height:33px;width:33px;flex:0 0 33px;display:grid;place-items:center;border-radius:10px;background:var(--surface-raised);border:1px solid var(--line);font-size:.8rem;font-weight:750;color:var(--muted)}
+.faith-day.complete .faith-day-number{background:var(--nav-active);color:var(--primary);border-color:var(--primary)}
+.faith-day-content{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.faith-day-content strong{font-size:.83rem;line-height:1.4}
+.faith-day-content>span{font-size:.76rem;color:var(--muted);line-height:1.55}
+.faith-open-day{align-self:start;background:none;color:var(--primary);padding:3px 4px 3px 0;display:flex;align-items:center;gap:6px;font-size:.77rem;font-weight:700;margin-top:3px}
+.faith-open-day:hover{text-decoration:underline}
+.faith-day-toggle{height:39px;width:39px;flex:0 0 39px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line);border-radius:11px;background:var(--surface-raised)}
+.faith-day-toggle:hover{color:var(--primary);background:var(--surface-hover)}
+.faith-day-toggle.checked{color:var(--primary);border-color:var(--primary);background:var(--nav-active)}
+.faith-day.next .faith-day-content strong{color:var(--text)}
+.faith-plan-footnote{font-size:.71rem;line-height:1.6;color:var(--soft);border-top:1px solid var(--line);padding-top:13px;margin-top:4px}
+.faith-complete{display:flex;align-items:center;gap:8px;background:var(--nav-active);color:var(--primary);border-radius:10px;padding:10px 12px;font-weight:650;font-size:.79rem;margin:8px 0}
+@media(max-width:850px){.faith-plan-detail{padding:18px}.faith-plan-tab{padding:12px 10px}}
+@media(max-width:600px){
+ .faith-plan-tabs{grid-template-columns:1fr;gap:7px}
+ .faith-plan-tab{flex-direction:row;justify-content:space-between;align-items:center;padding:12px;gap:8px}
+ .faith-plan-tab strong{font-size:.82rem}.faith-plan-tab span{white-space:nowrap}
+ .faith-plans-heading h2{font-size:1.08rem}.faith-plans-heading p{font-size:.76rem}
+ .faith-plan-detail{padding:15px}
+ .faith-plan-detail-head h3{font-size:1rem}
+ .faith-day{gap:9px}
+ .faith-day-number{width:29px;height:29px;flex-basis:29px}
+ .faith-day-content strong{font-size:.79rem}
+ .faith-day-content>span{font-size:.73rem}
+ .faith-day-toggle{width:38px;height:38px;flex-basis:38px}
+}
+@media(prefers-reduced-motion:reduce){.faith-progress-track>span{transition:none}}
+
+/* Carrossel acessível preservado da branch principal */
 .faith-progress{height:4px;overflow:hidden;background:var(--surface-raised);margin:0;border-radius:0}
 .faith-progress>span{display:block;height:100%;background:var(--primary);border-radius:0 4px 4px 0;transition:width .22s ease}
 .faith-keyboard-hint{margin:0;padding:9px 22px 15px;border-top:1px solid var(--line);color:var(--soft);font-size:.72rem;line-height:1.5}

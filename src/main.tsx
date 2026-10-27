@@ -116,6 +116,14 @@ function App(){
   function toggleFaithFavorite(id:string){
     update(prev=>{const items=prev.faithFavorites||[];return {...prev,faithFavorites:items.includes(id)?items.filter(x=>x!==id):[...items,id]}});
   }
+  function toggleReading(planId:string,entryId:string){
+    update(prev=>{
+      const all=prev.readingProgress||{};
+      const current=all[planId]||[];
+      const next=current.includes(entryId)?current.filter(v=>v!==entryId):[...current,entryId];
+      return {...prev,readingProgress:{...all,[planId]:next}};
+    });
+  }
   function addGratitude(body:string){
     update(prev=>({...prev,gratitudeNotes:[...(prev.gratitudeNotes||[]),{id:newId(),body,createdAt:Date.now()}].slice(-100)}));
   }
@@ -270,7 +278,7 @@ function App(){
           <div className="feed-header"><h2>Publicações <span>{visiblePosts.length}</span></h2><div className="segmented" aria-label="Filtrar publicações"><button onClick={()=>setFilter('all')} aria-pressed={filter==='all'} className={filter==='all'?'selected':''}>Todas</button><button onClick={()=>setFilter('friends')} aria-pressed={filter==='friends'} className={filter==='friends'?'selected':''}>Amigos</button></div></div>
           <div className="feed-list">{visiblePosts.length?visiblePosts.map(post=><React.Fragment key={post.id}>{PostCard({post})}</React.Fragment>):<div className="card empty"><Search size={26}/><strong>Não encontramos publicações</strong><span>Experimente outro termo ou publique algo novo.</span></div>}</div>
         </>}
-        {section==='faith'&&<FaithHub palette={palette} onPalette={setPalette} favorites={data.faithFavorites||[]} onFavorite={toggleFaithFavorite} notes={data.gratitudeNotes||[]} onAddNote={addGratitude} onDeleteNote={deleteGratitude} onShare={shareFaith}/>}
+        {section==='faith'&&<FaithHub palette={palette} onPalette={setPalette} favorites={data.faithFavorites||[]} onFavorite={toggleFaithFavorite} notes={data.gratitudeNotes||[]} onAddNote={addGratitude} onDeleteNote={deleteGratitude} onShare={shareFaith} readingProgress={data.readingProgress||{}} onToggleReading={toggleReading}/>}
         {section==='explore'&&<><div className="page-intro"><div><span className="eyebrow"><Compass size={14}/> DESCUBRA A REDE</span><h1>Explorar pessoas</h1><p>Conheça os perfis demonstrativos da comunidade.</p></div></div>{PeopleGrid({})}</>}
         {section==='friends'&&<><div className="page-intro"><div><span className="eyebrow"><Users size={14}/> SUA COMUNIDADE</span><h1>Amigos e conexões</h1><p>Gerencie amizades e solicitações fictícias neste navegador.</p></div></div>{incoming>0&&<div className="section-heading"><h2>Solicitações recebidas <span>{incoming}</span></h2></div>}{incoming>0&&PeopleGrid({type:'pending'})}<div className="section-heading"><h2>Pessoas da comunidade</h2></div>{PeopleGrid({})}</>}
         {section==='messages'&&<><div className="page-intro"><div><span className="eyebrow"><MessageCircle size={14}/> CONVERSAS</span><h1>Suas mensagens</h1><p>Abra conversas em janelas flutuantes. Mensagens ficam salvas localmente.</p></div></div><div className="card contact-list"><h2>Conversas demonstrativas</h2>{data.profiles.filter(p=>p.id!==me.id).map(p=>{const recent=data.messages.filter(m=>(m.from===p.id&&m.to===me.id)||(m.from===me.id&&m.to===p.id)).sort((a,b)=>b.createdAt-a.createdAt)[0];return <button className="contact-row" key={p.id} onClick={()=>openChat(p.id)}><Avatar profile={p}/><span><strong>{p.name}</strong><small>{recent?.body||'Inicie uma conversa demonstrativa'}</small></span><MessageCircle size={20}/></button>})}</div></>}
