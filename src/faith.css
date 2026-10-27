@@ -1,0 +1,126 @@
+/* Espaço Fé — interface editorial, com tokens integrados aos temas da Rede Jovem */
+:root[data-palette="sereno"]{--primary:#628ddc;--primary-hover:#7fa5ee;--focus:#a4c2ff;--nav-active:#263d66}
+:root[data-theme="light"][data-palette="sereno"]{--primary:#295c9d;--primary-hover:#3975b8;--focus:#2c68b2;--nav-active:#e8f1fb}
+:root[data-palette="esperanca"]{--primary:#81bc9c;--primary-hover:#a0d4b6;--focus:#9fdac3;--nav-active:#244d40}
+:root[data-theme="light"][data-palette="esperanca"]{--primary:#316950;--primary-hover:#408764;--focus:#357455;--nav-active:#e7f1e8}
+:root[data-palette="luz"]{--primary:#d6ad68;--primary-hover:#e7c587;--focus:#f3d696;--nav-active:#55462d}
+:root[data-theme="light"][data-palette="luz"]{--primary:#8b5c1d;--primary-hover:#ad752d;--focus:#ad752d;--nav-active:#fff0d5}
+:root[data-palette="esperanca"] .brand strong,:root[data-palette="luz"] .brand strong{color:var(--primary)}
+:root[data-palette="esperanca"] .welcome-art{background:linear-gradient(140deg,#325c4e,#163c38 68%,#11282a)}
+:root[data-palette="luz"] .welcome-art{background:linear-gradient(140deg,#65513b,#303e5c 70%,#19293e)}
+:root[data-palette="esperanca"] .btn.primary,:root[data-palette="luz"] .btn.primary{color:#0b1724}
+.faith-page{display:flex;flex-direction:column;gap:23px;min-width:0}
+.faith-hero{background:linear-gradient(118deg,#152e53 0%,#234b70 58%,#356678 100%);border:1px solid #476b7f;border-radius:25px;min-height:274px;padding:32px;display:flex;position:relative;overflow:hidden;isolation:isolate;color:#f5f8fc}
+:root[data-palette="esperanca"] .faith-hero{background:linear-gradient(114deg,#163b35,#30624d 65%,#4a806b)}
+:root[data-palette="luz"] .faith-hero{background:linear-gradient(114deg,#1e304e,#544c57 68%,#93774e)}
+.faith-hero::before{content:"";position:absolute;right:-50px;top:-150px;width:330px;height:350px;border-radius:50%;background:rgba(255,255,255,.07);filter:blur(10px);z-index:-1}
+.faith-hero-content{z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:14px;max-width:480px}
+.faith-overline{display:inline-flex;align-items:center;gap:7px;letter-spacing:.13em;font-size:.64rem;font-weight:800;color:#b6d9e6}
+.faith-hero h1{font-size:clamp(1.9rem,3.3vw,2.9rem);line-height:1.13;letter-spacing:-.045em;margin:0}
+.faith-hero h1 em{font-style:normal;color:#fae0a5}
+.faith-hero-content>p{font-size:.91rem;color:#dfebf5;line-height:1.65;max-width:420px}
+.faith-hero-pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto;padding-top:9px}
+.faith-hero-pills span{display:inline-flex;gap:6px;align-items:center;border:1px solid #ffffff40;border-radius:100px;padding:6px 10px;font-size:.73rem;background:#ffffff16;color:#eff8fa}
+.faith-hero-art{position:absolute;right:-2px;top:0;bottom:0;width:225px;display:grid;place-items:center;opacity:.9}
+.faith-orbit{border:1px solid rgba(255,255,255,.22);border-radius:50%;position:absolute}
+.orbit-one{width:175px;height:175px}.orbit-two{width:245px;height:245px}
+.faith-sun{height:107px;width:107px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(140deg,#e9dcae,#e2b777);color:#394c5a;box-shadow:0 0 90px #eacb8680}
+.faith-dot{position:absolute;border-radius:50%;background:#e9da9f}
+.dot-one{width:10px;height:10px;top:43px;right:53px}.dot-two{width:7px;height:7px;bottom:57px;left:14px}
+.faith-intro-line{display:flex;justify-content:space-between;align-items:end;gap:12px}
+.faith-intro-line h2{font-size:1.25rem;letter-spacing:-.028em;margin-top:5px}
+.faith-kicker{font-size:.67rem;letter-spacing:.12em;font-weight:800;color:var(--primary);display:inline-flex;align-items:center;gap:7px}
+.faith-content-note{font-size:.72rem;color:var(--muted);white-space:nowrap}
+.faith-filter-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faith-topics{display:flex;gap:8px;flex-wrap:wrap}
+.faith-topic{padding:8px 12px;border:1px solid var(--line);border-radius:100px;background:var(--surface);color:var(--muted);font-size:.76rem;font-weight:650;white-space:nowrap}
+.faith-topic:hover,.faith-favorite-filter:hover{background:var(--surface-hover)}
+.faith-topic.active{background:var(--nav-active);color:var(--primary);border-color:var(--primary)}
+.faith-favorite-filter{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:100px;background:var(--surface);color:var(--muted);padding:8px 12px;font-size:.76rem;white-space:nowrap}
+.faith-favorite-filter.active{color:var(--primary);border-color:var(--primary)}
+.faith-favorite-filter span{font-size:.7rem;opacity:.7}
+.faith-feature{overflow:hidden;position:relative}
+.faith-feature::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary)}
+.faith-feature-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 24px;border-bottom:1px solid var(--line)}
+.faith-day-label{display:inline-flex;align-items:center;gap:8px;color:var(--primary);font-size:.68rem;font-weight:800;letter-spacing:.12em}
+.faith-pagination{color:var(--soft);font-size:.75rem;white-space:nowrap}
+.faith-feature-main{padding:25px 31px 18px}
+.faith-reference{display:flex;align-items:center;gap:8px;color:var(--primary);font-size:.78rem;font-weight:700}
+.faith-reference span{opacity:.45;padding:0 2px}
+.faith-feature-main h3{font-size:clamp(1.35rem,2.4vw,1.83rem);letter-spacing:-.035em;margin:13px 0 14px;max-width:610px}
+.faith-reflection{font-size:.92rem;line-height:1.82;color:var(--muted);max-width:630px}
+.faith-question{margin-top:23px;padding:15px 17px;border-radius:13px;background:var(--surface-raised);border:1px solid var(--line)}
+.faith-question span{font-weight:750;font-size:.66rem;color:var(--primary);letter-spacing:.11em}
+.faith-question p{font-size:.86rem;line-height:1.65;margin-top:4px}
+.faith-disclaimer{font-size:.71rem;line-height:1.5;color:var(--soft);margin-top:13px}
+.faith-feature-footer{border-top:1px solid var(--line);padding:15px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.faith-nav-buttons,.faith-main-actions{display:flex;gap:9px;align-items:center}
+.faith-round{width:39px;height:39px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--muted);background:var(--surface-raised)}
+.faith-round:hover{background:var(--surface-hover);color:var(--text)}
+.faith-save{display:inline-flex;align-items:center;gap:8px;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--surface-raised);font-size:.82rem;font-weight:650;min-height:40px}
+.faith-save.saved{color:var(--primary);border-color:var(--primary)}
+.faith-empty{min-height:245px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:22px;text-align:center;color:var(--muted)}
+.faith-empty h3{color:var(--text)}.faith-empty p{font-size:.82rem}
+.faith-content-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:stretch}
+.faith-journal,.faith-personalize{padding:23px 22px}
+.faith-card-heading{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.faith-icon{width:46px;height:46px;flex-shrink:0;border-radius:13px;display:grid;place-items:center;color:var(--primary);background:var(--nav-active)}
+.faith-card-heading h2{font-size:1.01rem;margin-top:4px}
+.faith-journal>p,.faith-personalize>p{font-size:.81rem;line-height:1.66;color:var(--muted);margin-bottom:15px}
+.faith-journal label{display:block;font-size:.81rem;font-weight:650;margin-bottom:7px}
+.faith-journal textarea{font-size:.82rem;min-height:85px;resize:vertical}
+.faith-journal-actions{display:flex;justify-content:space-between;align-items:center;margin:11px 0 2px;gap:9px}
+.faith-journal-actions>span{color:var(--soft);font-size:.73rem}
+.faith-journal-actions .btn{font-size:.78rem}
+.faith-note-notice{color:var(--primary);font-size:.75rem;margin:7px 0}
+.faith-history-toggle{display:inline-flex;gap:7px;align-items:center;margin-top:14px;padding:0;background:none;color:var(--primary);font-weight:650;font-size:.78rem}
+.faith-notes{display:flex;flex-direction:column;gap:9px;margin-top:15px;max-height:265px;overflow-y:auto}
+.faith-note{background:var(--surface-raised);border:1px solid var(--line);border-radius:11px;padding:11px}
+.faith-note>p{font-size:.81rem;line-height:1.56;overflow-wrap:anywhere;white-space:pre-wrap}
+.faith-note>div{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.faith-note time{color:var(--soft);font-size:.69rem}
+.faith-note button{background:none;color:var(--muted);padding:5px}
+.faith-no-notes{font-size:.79rem;color:var(--muted)}
+.faith-palettes{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.faith-palettes legend{font-size:.79rem;font-weight:650;margin-bottom:9px}
+.faith-palette-choice{width:100%;display:flex;align-items:center;gap:12px;background:var(--surface-raised);border:1px solid var(--line);border-radius:11px;padding:10px;text-align:left;color:var(--text)}
+.faith-palette-choice.selected{border-color:var(--primary);background:var(--nav-active)}
+.faith-swatches{display:flex;overflow:hidden;border-radius:7px;flex-shrink:0}
+.faith-swatches i{width:16px;height:33px;display:block}
+.faith-palette-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.faith-palette-copy strong{font-size:.8rem}
+.faith-palette-copy small{font-size:.7rem;color:var(--muted)}
+.faith-palette-check{color:var(--primary);flex-shrink:0}
+.faith-privacy{display:flex;gap:8px;align-items:flex-start;border-top:1px solid var(--line);padding-top:15px;margin-top:17px;color:var(--soft);font-size:.72rem;line-height:1.5}
+.faith-privacy svg{flex-shrink:0}
+.faith-footer-note{display:flex;align-items:start;gap:10px;padding:13px 2px;color:var(--soft);font-size:.75rem;line-height:1.6}
+.faith-footer-note svg{flex-shrink:0;color:var(--primary)}
+@media(max-width:1150px){.faith-hero-art{opacity:.35}.faith-hero-content{max-width:100%}}
+@media(max-width:850px){.faith-content-grid{grid-template-columns:1fr}.faith-hero-art{opacity:.26}}
+@media(max-width:600px){
+ .faith-page{gap:19px}
+ .faith-hero{padding:25px 20px;min-height:250px;border-radius:19px}
+ .faith-hero-content{gap:12px}
+ .faith-hero h1{font-size:2.05rem}
+ .faith-hero-content>p{font-size:.83rem}
+ .faith-hero-art{right:-65px;opacity:.17}
+ .faith-overline{font-size:.6rem;letter-spacing:.08em}
+ .faith-intro-line{align-items:flex-start;flex-direction:column;gap:5px}
+ .faith-intro-line h2{font-size:1.14rem}
+ .faith-filter-toolbar{flex-direction:column;align-items:stretch}
+ .faith-topics{gap:7px}
+ .faith-topic{font-size:.72rem;padding:7px 11px}
+ .faith-favorite-filter{align-self:flex-start}
+ .faith-feature-header{padding:14px 15px}
+ .faith-feature-main{padding:19px 17px}
+ .faith-feature-main h3{font-size:1.37rem}
+ .faith-reflection{font-size:.87rem}
+ .faith-feature-footer{padding:13px 13px;gap:7px}
+ .faith-main-actions{gap:5px}
+ .faith-main-actions .btn{padding:8px 10px;font-size:.7rem}
+ .faith-save{padding:8px;font-size:.74rem}
+ .faith-round{width:35px;height:35px}
+ .faith-journal,.faith-personalize{padding:19px 15px}
+}
+@media(max-width:370px){.faith-feature-footer{flex-wrap:wrap}.faith-main-actions{margin-left:auto}.faith-hero-pills span{font-size:.66rem}}
+@media(prefers-reduced-motion:reduce){.faith-hero *, .faith-feature *{animation:none!important;transition:none!important}}
