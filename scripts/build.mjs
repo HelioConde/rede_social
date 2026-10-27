@@ -1,0 +1,11 @@
+import {rmSync,mkdirSync,cpSync,copyFileSync,writeFileSync,readdirSync} from "node:fs";
+import {resolve} from "node:path";
+const target=resolve("public-dist");
+rmSync(target,{recursive:true,force:true});mkdirSync(target,{recursive:true});
+copyFileSync("index.html",resolve(target,"index.html"));
+cpSync("site",resolve(target,"site"),{recursive:true});
+writeFileSync(resolve(target,".nojekyll"),"");
+writeFileSync(resolve(target,"robots.txt"),"User-agent: *\nAllow: /\n");
+const entries=readdirSync(target).sort();
+if(entries.some(x=>x.endsWith(".php")))throw Error("Arquivo PHP não pode ser publicado.");
+console.log("Publicação estática segura:",entries.join(", "));

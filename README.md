@@ -1,47 +1,32 @@
-<div align="center">
-  <h1>🌐 Rede Social — Experimento PHP</h1>
-  <p><strong>Um projeto histórico de rede social com cadastro, perfis, amizades, mensagens e publicações.</strong></p>
-  <p><img alt="PHP" src="https://img.shields.io/badge/PHP-Backend-777BB4?logo=php&logoColor=white"> <img alt="Status" src="https://img.shields.io/badge/status-sistema%20legado-64748b"></p>
-</div>
+# Rede Jovem — comunidade em modo local
 
-## O que este projeto representa
+Modernização da rede social PHP de 2019, preservando o nome, as cores azuis, as publicações, os amigos, o perfil e as mensagens.
 
-A **Rede Social** registra uma implementação antiga de funcionalidades comuns a comunidades online. Ao contrário de uma simples tela conceitual, o repositório contém **rotas PHP para cadastro, login, perfis, amigos, solicitações, publicações e mensagens**.
+**[Abrir GitHub Pages](https://helioconde.github.io/rede_social/)** · [Design System](docs/DESIGN_SYSTEM.md)
 
-Isso **não significa** que todas as funcionalidades estejam operacionais ou seguras em um ambiente atual.
+## Demonstração estática
+A interface de entrada é o arquivo index.html e utiliza somente HTML, CSS, JavaScript e localStorage. Publicações, curtidas, comentários, amizades, perfil, chat local, busca, exportação JSON e reinício funcionam no mesmo navegador, sem banco de dados.
 
-## Estrutura encontrada
+**Limites explícitos:** nenhuma conta real, login, comunicação entre usuários, envio a servidor, nem sincronização entre dispositivos. Os perfis exibidos são exemplos fictícios.
 
-| Área | Arquivos de exemplo |
-| --- | --- |
-| **Acesso e cadastro** | `cadastro.php`, `exec_registro.php`, `verificacao.php`, `id_login.php` |
-| **Perfis** | `perfil.php`, `editar.php`, `myphoto.php`, `uploudPerfil.php` |
-| **Amigos** | `addamigo.php`, `amigoslist.php`, `solicitacao.php`, `aceitaramigo.php` |
-| **Publicações** | `posts.php`, `postAmigos.php`, `gravar.php` |
-| **Mensagens e presença** | `amigosmsg.php`, `online.php`, `ocupado.php`, `ausente.php` |
-| **Busca** | `pesquisa.php` |
-| **Banco e recursos** | `config.php`, `img/`, `css/`, `js/`, `uploadedimage/` |
+## Executar e testar
+Execute um servidor estático na raiz do repositório:
 
-## Explorar localmente
+    python3 -m http.server 4173
 
-Para estudo, use PHP e um **banco isolado com dados fictícios**. Clone o repositório, revise previamente `config.php` e somente então inicie o servidor local:
+Visite http://localhost:4173. Para testar com Playwright:
 
-```bash
-git clone https://github.com/HelioConde/rede_social.git
-cd rede_social
-php -S 127.0.0.1:8000
-```
+    npm install
+    npx playwright install chromium
+    npm run build
+    npm test
 
-Abra o ponto de entrada esperado pela aplicação, considerando que há arquivos `Index.php` e outros scripts de acesso. **A autenticação e o banco de dados precisam ser configurados; a instalação não foi homologada nesta revisão.**
+As capturas automáticas são produzidas em tests/screenshots.
 
-## Segurança antes de qualquer publicação
+## GitHub Pages com isolamento
+O workflow em .github/workflows/pages.yml gera public-dist com **somente** index.html e site/ e publica essa pasta por Actions. Para ativar: abra Settings → Pages → Build and deployment → Source e selecione **GitHub Actions**. A publicação pela branch gh-pages também encontra a nova entrada index.html, mas **não exclui arquivos PHP históricos**; por isso recomendamos Actions.
 
-**Não coloque a aplicação na internet sem auditoria.** Sistemas sociais tratam informações pessoais, imagens e mensagens privadas; portanto, devem ter validação de sessões e permissões de cada usuário, SQL parametrizado, proteção de upload, escape contra XSS e defesa contra CSRF.
+## Segurança e legado
+Os arquivos PHP históricos permanecem no repositório para estudo e **não devem ser executados em produção**. Eles precisam de revisão de sessões, SQL injection, CSRF, tratamento de upload e rotação de credenciais eventualmente encontradas no histórico. A atualização não garante segurança do backend legado e não reescreve o histórico Git.
 
-Também revise **credenciais históricas, arquivos de configuração e qualquer arquivo enviado** antes de disponibilizar um repositório público. O fato de haver uma `verificacao.php` não garante proteção suficiente de todas as rotas.
-
-## Relação com outros projetos
-
-[**GameSocial**](https://github.com/HelioConde/rede_social_gamer) é um conceito separado em React para uma comunidade voltada a jogadores. Este repositório preserva a experiência PHP mais antiga.
-
-Desenvolvido por [Hélio Conde](https://github.com/HelioConde).
+Projeto de [Hélio Conde](https://github.com/HelioConde).
