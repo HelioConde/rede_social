@@ -24,8 +24,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verificação TypeScript e build
         run: npm run build
-      - name: Instalar Chromium e bibliotecas
-        run: npx playwright install --with-deps chromium
+      - name: Instalar Chromium para Playwright
+        run: npx playwright install chromium
       - name: Testes e capturas Playwright
         run: npm run test:e2e
       - name: Guardar capturas e traces
