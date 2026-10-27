@@ -46,3 +46,10 @@ Playwright cobre 360, 390, 768, 1280 e 1600 px e salva capturas completas de cin
 
 ## Limites do modo demonstrativo
 Não existe autenticação real, sincronização ou compartilhamento entre dispositivos. Dados persistem apenas no navegador por IndexedDB. Não armazenar informações privadas ou senhas.
+
+## Espaço Fé, outubro de 2026
+- Conteúdo cristão opcional e claramente identificado, sem inferência da religião do usuário.
+- Curadoria de 12 referências com reflexões originais, filtro por temas, favoritos e caderno local de gratidão.
+- Três paletas configuráveis: Azul Sereno, Verde Esperança e Luz e Fé; preferencias persistidas apenas no navegador.
+- Carrossel de reflexões com controles Anterior/Próxima nomeados, aria-live para avisos e suporte a movimento reduzido.
+- Pesquisas, limites metodológicos e fontes em `docs/MARKET_RESEARCH_FAITH.md`.

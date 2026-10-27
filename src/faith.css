@@ -135,3 +135,13 @@
 .faith-quick button:hover{background:var(--surface-hover)}
 @media(max-width:600px){.faith-quick{flex-wrap:wrap}.faith-quick button{margin-left:55px}.faith-quick strong{font-size:.81rem}}
 @media(max-width:370px){.faith-quick button{margin-left:0;width:100%;justify-content:center}}
+
+/* O texto dos botões usa fundo mais escuro nas variantes de alto contraste */
+:root[data-palette="sereno"] .btn.primary{background:#315b9b;color:#fff}
+:root[data-palette="sereno"] .btn.primary:hover:not(:disabled){background:#3d67a5}
+:root[data-theme="light"][data-palette="sereno"] .btn.primary{background:#295c9d;color:#fff}
+:root[data-theme="light"][data-palette="sereno"] .btn.primary:hover:not(:disabled){background:#356ba8}
+:root[data-palette="esperanca"] .btn.primary{background:#8dcaa8;color:#092820}
+:root[data-theme="light"][data-palette="esperanca"] .btn.primary{background:#286046;color:#fff}
+:root[data-palette="luz"] .btn.primary{background:#e1b56f;color:#33210c}
+:root[data-theme="light"][data-palette="luz"] .btn.primary{background:#855517;color:#fff}
