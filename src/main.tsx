@@ -4,16 +4,19 @@ import {
   Home, Users, MessageCircle, Search, Compass, Settings, Bell, Moon, Sun, Menu, X,
   Heart, Send, ImagePlus, MessageSquare, Trash2, Pencil, Check, UserRound,
   Download, Upload, RotateCcw, ChevronDown, Camera, ShieldCheck, Sparkles,
-  LayoutGrid, CheckCircle2, UserPlus, MapPin, Share2
+  LayoutGrid, CheckCircle2, UserPlus, MapPin, Share2, BookOpen
 } from 'lucide-react';
 import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
 import { downloadBackup, imageToDataUrl, isValidState, loadState, newId, saveState } from './storage';
 import './styles.css';
+import { FaithHub } from './FaithHub';
+import { faithPalettes, type FaithPalette } from './faith-content';
 
 const BASE=import.meta.env.BASE_URL;
 const NAV: {id:Section;label:string;icon:typeof Home}[]=[
   {id:'feed',label:'Início',icon:Home},
+  {id:'faith',label:'Espaço Fé',icon:BookOpen},
   {id:'explore',label:'Explorar',icon:Compass},
   {id:'friends',label:'Amigos',icon:Users},
   {id:'messages',label:'Mensagens',icon:MessageCircle},
@@ -47,6 +50,7 @@ function App(){
   const [search,setSearch]=useState('');
   const [mobileSearch,setMobileSearch]=useState(false);
   const [theme,setTheme]=useState(()=>{try{return localStorage.getItem('rede-jovem-theme')==='light'?'light':'dark'}catch{return 'dark'}});
+  const [palette,setPalette]=useState<FaithPalette>(()=>{try{const v=localStorage.getItem('rede-jovem-palette');return faithPalettes.some(p=>p.id===v)?v as FaithPalette:'sereno'}catch{return 'sereno'}});
   const [sidebar,setSidebar]=useState(false);
   const [notify,setNotify]=useState(false);
   const [toast,setToast]=useState('');
@@ -82,6 +86,7 @@ function App(){
   },[]);
   useEffect(()=>{if(!ready)return;saveState(data).then(()=>setSavingError(false)).catch(e=>{console.warn(e);setSavingError(true)})},[data,ready]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;try{localStorage.setItem('rede-jovem-theme',theme)}catch{}},[theme]);
+  useEffect(()=>{document.documentElement.dataset.palette=palette;try{localStorage.setItem('rede-jovem-palette',palette)}catch{}},[palette]);
   useEffect(()=>{
     const onHash=()=>{setSection(getSection());setSidebar(false);window.scrollTo({top:0})};
     addEventListener('hashchange',onHash);return ()=>removeEventListener('hashchange',onHash);
@@ -103,6 +108,19 @@ function App(){
     setPostUploading(true);
     try{setPostImage(await imageToDataUrl(file));feedback('Imagem preparada.')}catch(e){feedback(e instanceof Error?e.message:'Falha ao abrir imagem.')}
     finally{setPostUploading(false)}
+  }
+  function shareFaith(body:string){
+    update(prev=>({...prev,posts:[{id:newId(),authorId:prev.activeId,body,createdAt:Date.now(),likedBy:[],comments:[]},...prev.posts]}));
+    feedback('Reflexão compartilhada no seu feed local.');go('feed');
+  }
+  function toggleFaithFavorite(id:string){
+    update(prev=>{const items=prev.faithFavorites||[];return {...prev,faithFavorites:items.includes(id)?items.filter(x=>x!==id):[...items,id]}});
+  }
+  function addGratitude(body:string){
+    update(prev=>({...prev,gratitudeNotes:[...(prev.gratitudeNotes||[]),{id:newId(),body,createdAt:Date.now()}].slice(-100)}));
+  }
+  function deleteGratitude(id:string){
+    update(prev=>({...prev,gratitudeNotes:(prev.gratitudeNotes||[]).filter(n=>n.id!==id)}));
   }
   function toggleLike(id:string){
     update(prev=>({...prev,posts:prev.posts.map(p=>p.id!==id?p:{...p,likedBy:p.likedBy.includes(prev.activeId)?p.likedBy.filter(x=>x!==prev.activeId):[...p.likedBy,prev.activeId]})}));
@@ -244,6 +262,7 @@ function App(){
         {savingError&&<div role="alert" className="storage-warning">Não foi possível salvar seus dados. Exporte um backup antes de sair.</div>}
         {section==='feed'&&<>
           <div className="page-intro"><div><span className="eyebrow"><Sparkles size={14}/> SEU ESPAÇO SOCIAL</span><h1>Boas-vindas, {me.name.split(' ')[0]}! <span>✦</span></h1><p>Compartilhe ideias e acompanhe sua comunidade.</p></div><div className="date-pill"><LayoutGrid size={16}/> Feed da comunidade</div></div>
+          <div className="faith-quick card"><span className="faith-quick-icon"><BookOpen size={21}/></span><div><strong>Um momento para renovar as esperanças</strong><p>Um espaço opcional com reflexões bíblicas, gratidão e mensagens de paz.</p></div><button type="button" onClick={()=>go('faith')}>Conhecer Espaço Fé <span aria-hidden="true">→</span></button></div>
           <section className="card composer" aria-label="Criar publicação"><div className="composer-head"><Avatar profile={me}/><textarea aria-label="O que você está pensando?" placeholder={'No que você está pensando, '+me.name.split(' ')[0]+'?'} maxLength={2000} value={postBody} onChange={e=>setPostBody(e.target.value)} rows={2}/></div>
             {postImage&&<div className="attachment"><img alt="Prévia da imagem selecionada" src={postImage}/><button className="icon-btn" aria-label="Remover imagem" onClick={()=>setPostImage('')}><X size={18}/></button></div>}
             <div className="composer-bottom"><label className="upload-label" htmlFor="post-photo"><ImagePlus size={19}/> <span>Foto</span></label><input id="post-photo" ref={uploadInput} type="file" accept="image/*" onChange={e=>picture(e.target.files?.[0])}/><span className="compose-counter">{postBody.length}/2000</span><button className="btn primary" disabled={postUploading||(!postBody.trim()&&!postImage)} onClick={post}><Send size={16}/> Publicar</button></div>
@@ -251,6 +270,7 @@ function App(){
           <div className="feed-header"><h2>Publicações <span>{visiblePosts.length}</span></h2><div className="segmented" aria-label="Filtrar publicações"><button onClick={()=>setFilter('all')} aria-pressed={filter==='all'} className={filter==='all'?'selected':''}>Todas</button><button onClick={()=>setFilter('friends')} aria-pressed={filter==='friends'} className={filter==='friends'?'selected':''}>Amigos</button></div></div>
           <div className="feed-list">{visiblePosts.length?visiblePosts.map(post=><React.Fragment key={post.id}>{PostCard({post})}</React.Fragment>):<div className="card empty"><Search size={26}/><strong>Não encontramos publicações</strong><span>Experimente outro termo ou publique algo novo.</span></div>}</div>
         </>}
+        {section==='faith'&&<FaithHub palette={palette} onPalette={setPalette} favorites={data.faithFavorites||[]} onFavorite={toggleFaithFavorite} notes={data.gratitudeNotes||[]} onAddNote={addGratitude} onDeleteNote={deleteGratitude} onShare={shareFaith}/>}
         {section==='explore'&&<><div className="page-intro"><div><span className="eyebrow"><Compass size={14}/> DESCUBRA A REDE</span><h1>Explorar pessoas</h1><p>Conheça os perfis demonstrativos da comunidade.</p></div></div>{PeopleGrid({})}</>}
         {section==='friends'&&<><div className="page-intro"><div><span className="eyebrow"><Users size={14}/> SUA COMUNIDADE</span><h1>Amigos e conexões</h1><p>Gerencie amizades e solicitações fictícias neste navegador.</p></div></div>{incoming>0&&<div className="section-heading"><h2>Solicitações recebidas <span>{incoming}</span></h2></div>}{incoming>0&&PeopleGrid({type:'pending'})}<div className="section-heading"><h2>Pessoas da comunidade</h2></div>{PeopleGrid({})}</>}
         {section==='messages'&&<><div className="page-intro"><div><span className="eyebrow"><MessageCircle size={14}/> CONVERSAS</span><h1>Suas mensagens</h1><p>Abra conversas em janelas flutuantes. Mensagens ficam salvas localmente.</p></div></div><div className="card contact-list"><h2>Conversas demonstrativas</h2>{data.profiles.filter(p=>p.id!==me.id).map(p=>{const recent=data.messages.filter(m=>(m.from===p.id&&m.to===me.id)||(m.from===me.id&&m.to===p.id)).sort((a,b)=>b.createdAt-a.createdAt)[0];return <button className="contact-row" key={p.id} onClick={()=>openChat(p.id)}><Avatar profile={p}/><span><strong>{p.name}</strong><small>{recent?.body||'Inicie uma conversa demonstrativa'}</small></span><MessageCircle size={20}/></button>})}</div></>}
