@@ -6,6 +6,7 @@ Uma releitura do projeto **Rede Jovem** (2019–2022), agora em **React + TypeSc
 
 ## Recursos
 - Feed: criar, editar, excluir, curtir e comentar publicações.
+- **Espaço Fé (opcional):** 12 referências bíblicas com reflexões autorais, filtros por tema, favoritos, caderno local de gratidão, compartilhamento voluntário e três paletas de cores.
 - Imagens: pré-visualização, validação e compressão no navegador.
 - Perfis: avatar, nome, usuário, biografia e cidade.
 - Amizades: adicionar e aceitar solicitações fictícias.
@@ -40,4 +41,4 @@ O PHP original foi preservado na branch **`legacy/php-20261027`**; a branch publ
 
 O legado PHP utilizava `mysql_*`, queries com dados não confiáveis e senhas sem hash, e **não deve ser reativado em produção**. Para uma rede social real, é necessário backend e autenticação com controles de acesso próprios.
 
-Consulte `docs/DESIGN_SYSTEM.md` para design e acessibilidade.
+Consulte `docs/DESIGN_SYSTEM.md` para design e acessibilidade e `docs/MARKET_RESEARCH_FAITH.md` para dados, fontes, limites e hipóteses de cores.
