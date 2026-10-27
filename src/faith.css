@@ -153,3 +153,11 @@
   .faith-quick>div{grid-column:2;grid-row:1;min-width:0}
   .faith-quick button{grid-column:1/-1;grid-row:2;margin-left:0;width:100%;justify-content:center;white-space:normal}
 }
+
+/* Image to Code: carrossel editorial com trilho de progresso e navegação acessível. */
+.faith-feature:focus-visible{outline:3px solid var(--focus);outline-offset:4px}
+.faith-progress{height:4px;overflow:hidden;background:var(--surface-raised);margin:0;border-radius:0}
+.faith-progress>span{display:block;height:100%;background:var(--primary);border-radius:0 4px 4px 0;transition:width .22s ease}
+.faith-keyboard-hint{margin:0;padding:9px 22px 15px;border-top:1px solid var(--line);color:var(--soft);font-size:.72rem;line-height:1.5}
+@media(max-width:600px){.faith-keyboard-hint{padding:9px 15px 13px;font-size:.69rem}}
+@media(prefers-reduced-motion:reduce){.faith-progress>span{transition:none!important}}

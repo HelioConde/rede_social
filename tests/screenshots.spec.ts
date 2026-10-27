@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-const widths=[360,390,768,1280,1600];
+const widths=[320,360,390,768,1280,1600];
 const pages=['feed','faith','explore','friends','messages','profile'] as const;
 test.describe('Capturas automáticas e layout sem overflow',()=>{
   for(const width of widths){

@@ -53,3 +53,10 @@ Não existe autenticação real, sincronização ou compartilhamento entre dispo
 - Três paletas configuráveis: Azul Sereno, Verde Esperança e Luz e Fé; preferencias persistidas apenas no navegador.
 - Carrossel de reflexões com controles Anterior/Próxima nomeados, aria-live para avisos e suporte a movimento reduzido.
 - Pesquisas, limites metodológicos e fontes em `docs/MARKET_RESEARCH_FAITH.md`.
+
+## Polimento do Espaço Fé — navegação (27/10/2026)
+- Cartão de reflexão é uma região focável com `aria-roledescription="carrossel"` e instrução de teclado associada.
+- `ArrowLeft/ArrowRight` percorrem os itens; `Home/End` saltam para início/fim, sem capturar eventos de campos ou botões internos.
+- Indicador visual de progresso atualizado com a posição selecionada; numeração com anúncio discreto em `aria-live`.
+- Progressão é instantânea quando o sistema solicita movimento reduzido.
+- Playwright valida posição, teclado e interferência zero com o caderno de gratidão.

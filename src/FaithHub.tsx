@@ -33,6 +33,15 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
     if(filtered.length===0)return;
     setSelected(filtered[(position+delta+filtered.length)%filtered.length].id);
   }
+  function keyboardNavigate(event:React.KeyboardEvent<HTMLElement>){
+    // Não capturar as teclas de campos, botões ou outros controles internos.
+    if(event.target!==event.currentTarget||filtered.length===0)return;
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+    event.preventDefault();
+    if(event.key==='Home')setSelected(filtered[0].id);
+    else if(event.key==='End')setSelected(filtered[filtered.length-1].id);
+    else navigate(event.key==='ArrowRight'?1:-1);
+  }
   function addNote(){
     const value=note.trim();
     if(!value||value.length>400)return;
@@ -61,11 +70,13 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
       <button className={'faith-favorite-filter '+(savedOnly?'active':'')} type="button" aria-pressed={savedOnly} onClick={()=>{setSavedOnly(v=>!v);setSelected('')}}><Heart size={17} fill={savedOnly?'currentColor':'none'}/> Salvos <span>{favorites.length}</span></button>
     </div>
 
-    {active?<article className="faith-feature card" data-testid="faith-feature" aria-label="Reflexão bíblica">
+    {active?<article className="faith-feature card" data-testid="faith-feature" role="region" aria-roledescription="carrossel"
+      aria-label="Reflexões de fé" aria-describedby="faith-keyboard-hint" tabIndex={0} onKeyDown={keyboardNavigate}>
       <div className="faith-feature-header">
         <span className="faith-day-label"><Sparkles size={15}/> {topic==='Todos'&&!savedOnly?'REFLEXÃO EM DESTAQUE':'REFLEXÃO SELECIONADA'}</span>
-        <span className="faith-pagination">{position+1} de {filtered.length}</span>
+        <span className="faith-pagination" aria-live="polite" aria-atomic="true">{position+1} de {filtered.length}</span>
       </div>
+      <div className="faith-progress" aria-hidden="true"><span style={{width:((position+1)/filtered.length*100)+'%'}} /></div>
       <div className="faith-feature-main">
         <div className="faith-reference"><BookOpen size={17}/>{active.ref}<span>·</span>{active.topic}</div>
         <h3>{active.title}</h3>
@@ -83,6 +94,7 @@ export function FaithHub({palette,onPalette,favorites,onFavorite,notes,onAddNote
           <button type="button" className="btn primary" onClick={share}><Send size={16}/> Compartilhar no feed</button>
         </div>
       </div>
+      <p className="faith-keyboard-hint" id="faith-keyboard-hint">Dica: selecione este cartão e use ← → para explorar, Home para o início e End para o fim.</p>
     </article>:<div className="card faith-empty"><Heart size={26}/><h3>Nenhuma reflexão salva neste filtro</h3><p>Experimente outro tema ou desative o filtro de favoritos.</p><button type="button" className="btn secondary" onClick={()=>{setSavedOnly(false);setTopic('Todos')}}>Ver todas as reflexões</button></div>}
 
     <div className="faith-content-grid">

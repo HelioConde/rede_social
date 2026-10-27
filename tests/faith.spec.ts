@@ -70,3 +70,27 @@ test('convite ao Espaço Fé não espreme conteúdo no feed mobile',async ({page
   await invitation.getByRole('button',{name:/Conhecer Espaço Fé/}).click();
   await expect(page.getByRole('heading',{name:/Uma pausa para a alma/})).toBeVisible();
 });
+
+
+test('carrossel recebe foco, mostra progresso e navega com teclado',async ({page})=>{
+  const card=page.getByTestId('faith-feature');
+  await expect(card).toHaveAttribute('aria-roledescription','carrossel');
+  await card.focus();
+  const initial=await card.locator('.faith-reference').innerText();
+  await page.keyboard.press('ArrowRight');
+  await expect(card.locator('.faith-reference')).not.toHaveText(initial);
+  await expect(card.locator('.faith-progress span')).toBeVisible();
+  await page.keyboard.press('End');
+  await expect(card.locator('.faith-pagination')).toContainText('12 de 12');
+  await page.keyboard.press('Home');
+  await expect(card.locator('.faith-pagination')).toContainText('1 de 12');
+  await expect(card.getByText(/use ← → para explorar/)).toBeVisible();
+});
+
+test('setas do carrossel não interferem nas entradas de gratidão',async ({page})=>{
+  const field=page.locator('#faith-gratitude');
+  await field.fill('Minha gratidão');
+  await field.press('ArrowLeft');
+  await expect(field).toHaveValue('Minha gratidão');
+  await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 12/);
+});
