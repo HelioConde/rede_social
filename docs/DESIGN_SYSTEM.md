@@ -36,7 +36,7 @@ Modernizar o projeto histórico **Rede Jovem**, arquivado em `legacy/php-2026102
 - Foco visível com 3 px de contorno em teclado; ligação "Pular para conteúdo".
 - `aria-live` para avisos e conversas; `aria-pressed` em filtros e curtidas.
 - `prefers-reduced-motion: reduce` desativa animações/transições e rolagem suave.
-- Não há carrossel funcional no projeto original; não foi introduzido um carrossel artificial apenas para cumprir o checklist.
+- O feed preserva navegação convencional; o **Espaço Fé** possui um carrossel editorial real com região focável, setas nomeadas, `aria-live`, Home/End e movimento reduzido.
 
 ## Image to Code
 A linguagem visual referencia a arquitetura do projeto PHP antigo, mas reconstrói suas telas em componentes React, evitando imagens de layout como substituto de conteúdo. O fundo legado é usado somente na capa do perfil.
@@ -60,3 +60,7 @@ Não existe autenticação real, sincronização ou compartilhamento entre dispo
 - Indicador visual de progresso atualizado com a posição selecionada; numeração com anúncio discreto em `aria-live`.
 - Progressão é instantânea quando o sistema solicita movimento reduzido.
 - Playwright valida posição, teclado e interferência zero com o caderno de gratidão.
+
+## Alvos de toque — Espaço Fé (27/10/2026)
+- Setas do carrossel, filtros por tema, filtro de salvos, botão Salvar, histórico e exclusão de anotações possuem área interativa mínima de **44×44 px**, inclusive em 360 px de largura.
+- Não alterar a ordem semântica ou a identidade do carrossel para expandir os controles; os testes verificam tamanho e ausência de rolagem horizontal.
