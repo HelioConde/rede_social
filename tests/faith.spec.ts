@@ -94,3 +94,24 @@ test('setas do carrossel não interferem nas entradas de gratidão',async ({page
   await expect(field).toHaveValue('Minha gratidão');
   await expect(page.getByTestId('faith-feature').locator('.faith-pagination')).toContainText(/de 12/);
 });
+
+
+test('controles da seção Fé oferecem alvos de toque acessíveis no celular', async ({page})=>{
+  await page.setViewportSize({width:360,height:780});
+  await page.goto('/rede_social/#faith');
+  const selectors=['.faith-topic','.faith-favorite-filter','.faith-round','.faith-save','.faith-history-toggle'];
+  for(const selector of selectors){
+    const elements=page.locator(selector);
+    const boxes=await elements.evaluateAll(nodes=>nodes.filter(el=>el.getClientRects().length>0).map(el=>{
+      const r=el.getBoundingClientRect();
+      return {width:r.width,height:r.height};
+    }));
+    expect(boxes.length,selector).toBeGreaterThan(0);
+    for(const box of boxes){
+      expect(box.width,selector+' largura').toBeGreaterThanOrEqual(44);
+      expect(box.height,selector+' altura').toBeGreaterThanOrEqual(44);
+    }
+  }
+  await expect(page.getByRole('button',{name:'Próxima reflexão'})).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+});
