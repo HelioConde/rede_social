@@ -145,3 +145,11 @@
 :root[data-theme="light"][data-palette="esperanca"] .btn.primary{background:#286046;color:#fff}
 :root[data-palette="luz"] .btn.primary{background:#e1b56f;color:#33210c}
 :root[data-theme="light"][data-palette="luz"] .btn.primary{background:#855517;color:#fff}
+
+/* QA visual 390px: CTA do feed sem colunas estreitas ou texto espremido */
+@media(max-width:600px){
+  .faith-quick{display:grid;grid-template-columns:43px minmax(0,1fr);column-gap:12px;row-gap:12px;align-items:center}
+  .faith-quick-icon{grid-column:1;grid-row:1}
+  .faith-quick>div{grid-column:2;grid-row:1;min-width:0}
+  .faith-quick button{grid-column:1/-1;grid-row:2;margin-left:0;width:100%;justify-content:center;white-space:normal}
+}

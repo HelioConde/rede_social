@@ -59,3 +59,14 @@ test('paleta e favoritos funcionam no mobile e sem movimento',async ({page})=>{
   await page.getByRole('button',{name:'Salvar',exact:true}).click();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth)).toBeLessThanOrEqual(1);
 });
+
+test('convite ao Espaço Fé não espreme conteúdo no feed mobile',async ({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/rede_social/#feed');
+  const invitation=page.locator('.faith-quick');
+  await expect(invitation).toBeVisible();
+  const height=await invitation.evaluate(el=>el.getBoundingClientRect().height);
+  expect(height).toBeLessThan(205);
+  await invitation.getByRole('button',{name:/Conhecer Espaço Fé/}).click();
+  await expect(page.getByRole('heading',{name:/Uma pausa para a alma/})).toBeVisible();
+});
