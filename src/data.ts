@@ -4,7 +4,7 @@ export const starterData = (): SocialData => ({
   version: 1,
   activeId: 'me',
   profiles: [
-    { id: 'me', name: 'Meu perfil', handle: 'meuperfil', bio: 'Bem-vindo à Rede Jovem! Personalize seu espaço e compartilhe suas ideias.', city: 'Brasil', avatar: '', color: '#5271ed' },
+    { id: 'me', name: 'Visitante', handle: 'visitante', bio: 'Bem-vindo à Rede Jovem! Personalize seu espaço e compartilhe suas ideias.', city: 'Brasil', avatar: '', color: '#5271ed' },
     { id: 'ana', name: 'Ana Martins', handle: 'anamartins', bio: 'Fotografia, viagens e boas histórias.', city: 'São Paulo', avatar: '', color: '#cc6ca0' },
     { id: 'leo', name: 'Léo Oliveira', handle: 'leoliveira', bio: 'Música, jogos e tecnologia 🎮', city: 'Curitiba', avatar: '', color: '#1caeaa' },
     { id: 'bia', name: 'Bia Costa', handle: 'biacosta', bio: 'Arte, livros e café.', city: 'Brasília', avatar: '', color: '#b387e4' },

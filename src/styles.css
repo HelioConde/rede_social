@@ -267,3 +267,13 @@ button{border:0}
 }
 @media(max-width:370px){.people-grid{grid-template-columns:1fr}.person-banner{height:65px}.settings-buttons .btn{width:100%}.top-user{display:none}.compose-counter{display:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Busca mobile acionável por toque e teclado */
+.mobile-search-btn{display:none}
+@media(max-width:600px){
+  .search-desktop-icon{display:none}
+  .mobile-search-btn{display:inline-grid;min-width:32px;min-height:36px}
+  .topbar.search-open .brand-btn{display:none}
+  .top-search.expanded{width:100%;min-width:0;flex:1;max-width:none;justify-content:flex-start;background:var(--input);border:1px solid var(--line)}
+  .top-search.expanded input{display:block;flex:1;min-width:0;padding:8px 0}
+}

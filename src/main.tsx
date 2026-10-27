@@ -45,6 +45,7 @@ function App(){
   const [ready,setReady]=useState(false);
   const [section,setSection]=useState<Section>(getSection);
   const [search,setSearch]=useState('');
+  const [mobileSearch,setMobileSearch]=useState(false);
   const [theme,setTheme]=useState(()=>{try{return localStorage.getItem('rede-jovem-theme')==='light'?'light':'dark'}catch{return 'dark'}});
   const [sidebar,setSidebar]=useState(false);
   const [notify,setNotify]=useState(false);
@@ -219,10 +220,10 @@ function App(){
   if(!ready)return <div className="loading-screen"><Logo/><p>Carregando seu espaço...</p></div>;
   return <div className="app-shell">
     <a href="#main" className="skip-link">Pular para conteúdo</a>
-    <header className="topbar">
+    <header className={"topbar "+(mobileSearch?"search-open":"")}>
       <button className="icon-btn hamburger" aria-label="Abrir menu" aria-expanded={sidebar} onClick={()=>setSidebar(v=>!v)}><Menu size={22}/></button>
       <button className="brand-btn" onClick={()=>go('feed')} aria-label="Rede Jovem, início"><Logo/></button>
-      <div className="top-search"><Search size={19}/><input aria-label="Pesquisar pessoas e publicações" placeholder="Pesquisar na Rede Jovem" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Limpar busca" onClick={()=>setSearch('')}><X size={15}/></button>}</div>
+      <div className={"top-search "+(mobileSearch?"expanded":"")}><Search className="search-desktop-icon" size={19}/><button className="mobile-search-btn icon-btn" aria-label={mobileSearch?"Fechar busca":"Abrir busca"} aria-expanded={mobileSearch} onClick={()=>setMobileSearch(v=>!v)}>{mobileSearch?<X size={19}/>:<Search size={19}/>}</button><input aria-label="Pesquisar pessoas e publicações" placeholder="Pesquisar na Rede Jovem" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Limpar busca" onClick={()=>setSearch('')}><X size={15}/></button>}</div>
       <div className="top-actions">
         <Pill><ShieldCheck size={14}/> Modo demonstração</Pill>
         <button className="icon-btn top-theme" aria-label={theme==='dark'?'Ativar modo claro':'Ativar modo escuro'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={20}/>:<Moon size={20}/>}</button>

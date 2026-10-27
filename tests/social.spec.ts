@@ -40,11 +40,21 @@ test('editar perfil, alternar tema e restaurar demonstração',async ({page})=>{
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   page.once('dialog',d=>d.accept());
   await page.getByRole('button',{name:'Restaurar demonstração'}).click();
-  await expect(page.getByRole('heading',{name:/Boas-vindas, Meu/})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/Boas-vindas, Visitante/})).toBeVisible();
 });
 test('busca filtra publicações e botões têm nomes acessíveis', async ({page})=>{
   await page.getByRole('textbox',{name:'Pesquisar pessoas e publicações'}).fill('criatividade conecta');
   await expect(page.getByTestId('post-card')).toHaveCount(1);
   await expect(page.getByRole('button',{name:'Notificações'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Ativar modo claro'})).toBeVisible();
+});
+
+test('busca mobile expande por botão acessível',async ({page})=>{
+  await page.setViewportSize({width:390,height:800});
+  await page.goto('/rede_social/');
+  await page.getByRole('button',{name:'Abrir busca'}).click();
+  const search=page.getByRole('textbox',{name:'Pesquisar pessoas e publicações'});
+  await expect(search).toBeVisible();
+  await search.fill('criatividade conecta');
+  await expect(page.getByTestId('post-card')).toHaveCount(1);
 });
