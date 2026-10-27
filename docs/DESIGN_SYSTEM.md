@@ -1,14 +1,17 @@
-# Design System — Rede Social
-Projeto: releitura estática da Rede Social original, preservando a assinatura azul/noite.
-
+# Rede Social — Design System
+## Objetivo
+Modernização sem destruir o código histórico PHP. A demonstração estática usa dados fictícios, localStorage e nenhuma API remota.
 ## Taste Skill
-Tokens CSS: `--space-1/2/3/4/6/8`, `--r`, `--bg`, `--panel`, `--border`, `--primary`, `--text`, `--muted`, `--shadow`. Ritmo baseado em 4px; superfícies semi-opacas.
-
+- Espaçamento: 4, 8, 12, 16, 24 e 32px.
+- Cor principal: aqua suave (#86e8d4), superfícies azul-grafite (#15223a), texto claro (#e9f1ff).
+- Raio de cartões 17px; foco amarelo visível.
 ## Web Design Guidelines
-HTML semântico; atalhos por teclado; skip-link; foco visível; estados em `aria-live`; controles com rótulos; `prefers-reduced-motion`; texto em alto contraste; sem hover obrigatório.
-
-## Awesome Design e Image to Code
-Referências: identidade histórica com fundo azul e gradiente, feed central, menu lateral, coluna de contatos, avatar e conversa flutuante. Redesenho com grid responsivo, mensagens em janela, cartões e perfil. Sem banco e sem autenticação simulada como real.
-
-## QA / Playwright
-Validar: largura horizontal 360/390/768/1440, publicação e curtida, navegação hash, conversa e privacidade, captura em diferentes resoluções, erros de console e exceções JavaScript.
+Botões semânticos, skip link, formulários com rótulos, mensagens status acessíveis, escape de XSS por textContent e reduced motion.
+## Awesome Design
+Sidebar responsiva; mural com editor, busca e curtidas; cartões para pessoas; chat local com histórico; exportação JSON.
+## Image to Code
+Evitar copiar visuais de plataformas comerciais. Preservar a essência social do projeto original usando um novo design próprio.
+## Páginas e segurança
+GitHub Pages publica somente quatro arquivos de pages/. Nunca publicar PHP, SQL, uploads ou configs como artefato de Pages. LocalStorage não é login seguro nem serviço multiplayer.
+## Playwright
+Capturas 390/768/1366/1600px, post e persistência, chat local, navegação, ausência de erro JavaScript e overflow.
