@@ -1,23 +1,43 @@
-# Rede Social — edição estática de demonstração
+# Rede Jovem — versão moderna
 
-Este repositório mantém o histórico do antigo projeto PHP/MySQL na branch `legacy/php-20261027`. A branch publicada `gh-pages` contém **somente arquivos estáticos** para proteger o GitHub Pages contra exposição acidental de scripts PHP.
+Uma releitura do projeto **Rede Jovem** (2019–2022), agora em **React + TypeScript + Vite**, com identidade original preservada e publicação estática no GitHub Pages.
 
-## Funcionalidades
-- Feed com publicações, curtidas, exclusão com confirmação e pesquisa.
-- Lista de contatos fictícios e janelas de conversa no canto da tela.
-- Mensagens, publicações e curtidas salvas **apenas neste navegador**, em localStorage.
-- Exportação JSON e botão para limpar todos os dados locais.
-- Responsividade, navegação por teclado, foco visível e respeito a movimento reduzido.
+**Demonstração:** https://helioconde.github.io/rede_social/ (após habilitar GitHub Pages → GitHub Actions e publicar a branch `gh-pages`).
 
-**Limites reais:** sem login, banco de dados, servidor, envio de mensagens para terceiros ou sincronização entre dispositivos. Não use dados sensíveis. O aplicativo não é uma rede social hospedada com usuários reais.
+## Recursos
+- Feed: criar, editar, excluir, curtir e comentar publicações.
+- Imagens: pré-visualização, validação e compressão no navegador.
+- Perfis: avatar, nome, usuário, biografia e cidade.
+- Amizades: adicionar e aceitar solicitações fictícias.
+- Mensagens: chats locais em janelas flutuantes (até duas no desktop).
+- Busca, notificações fictícias, temas claro/escuro e layout responsivo.
+- Dados armazenados via IndexedDB; backup e restauração com JSON.
+- Playwright: funcionalidades e 25 capturas em 5 resoluções.
 
-## Publicação
-O GitHub Pages pode servir os arquivos diretamente pela branch `gh-pages` na pasta `/`, ou via workflow `.github/workflows/pages.yml` quando configurado para **GitHub Actions** em Settings → Pages.
-URL esperada: https://helioconde.github.io/rede_social/
+### IMPORTANTE: demonstração sem backend
+A aplicação **não é uma rede social multiusuário real**. Não há senha, autenticação, servidor, banco remoto ou mensagens recebidas da internet. Os outros perfis são dados fictícios. Publicações, conversas e imagens ficam apenas no navegador e podem ser apagadas pelos dados do site. Não use dados pessoais sensíveis.
 
-## Testes
-`node --check app.js` e `node tests/smoke.cjs`.
-O workflow executa verificação e auditoria Playwright em resoluções mobile, tablet e desktop e arquiva capturas. A validação visual manual continua recomendada.
+## Desenvolver
+```bash
+npm install
+npm run dev
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+Node.js 22+ recomendado. O Vite usa `base: '/rede_social/'` para garantir caminhos corretos no GitHub Pages.
 
-## Segurança
-A versão PHP antiga usava APIs MySQL obsoletas. Credenciais históricas que tenham sido publicadas no Git devem ser **revogadas/rotacionadas**, mesmo que não estejam mais na branch de publicação: remover arquivos atuais não apaga o histórico Git.
+## Publicar no GitHub Pages
+1. Integre a branch de modernização à `gh-pages`.
+2. Em **Settings → Pages → Build and deployment**, selecione **Source: GitHub Actions**.
+3. O workflow `.github/workflows/rede-jovem-pages.yml` executará build, verificações Playwright e deploy do diretório `dist/`.
+4. Em **Actions**, abra o workflow para baixar o artefato de screenshots e inspecionar testes.
+
+O deploy é bloqueado se o job QA falhar. Publicações em branches de desenvolvimento executam QA, mas não substituem o site público.
+
+## Segurança e histórico
+O PHP original foi preservado na branch **`legacy/php-20261027`**; a branch publicada não contém arquivos PHP, configurações nem uploads legados. Senhas históricas ainda devem ser rotacionadas, pois commits antigos continuam consultáveis.
+
+O legado PHP utilizava `mysql_*`, queries com dados não confiáveis e senhas sem hash, e **não deve ser reativado em produção**. Para uma rede social real, é necessário backend e autenticação com controles de acesso próprios.
+
+Consulte `docs/DESIGN_SYSTEM.md` para design e acessibilidade.

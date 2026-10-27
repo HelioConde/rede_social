@@ -1,0 +1,61 @@
+name: Rede Jovem — QA e GitHub Pages
+on:
+  push:
+    branches: [gh-pages, modernizacao/rede-jovem-pages-2026]
+  pull_request:
+    branches: [gh-pages]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: rede-jovem-pages-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar dependências
+        run: npm install --no-audit --no-fund
+      - name: Verificação TypeScript e build
+        run: npm run build
+      - name: Instalar Chromium e bibliotecas
+        run: npx playwright install --with-deps chromium
+      - name: Testes e capturas Playwright
+        run: npm run test:e2e
+      - name: Guardar capturas e traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rede-jovem-playwright-${{ github.run_number }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Habilitar e configurar Pages
+        if: github.ref == 'refs/heads/gh-pages' && github.event_name == 'push'
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Disponibilizar dist para Pages
+        if: github.ref == 'refs/heads/gh-pages' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/
+  deploy:
+    if: github.ref == 'refs/heads/gh-pages' && github.event_name == 'push'
+    needs: qa
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
