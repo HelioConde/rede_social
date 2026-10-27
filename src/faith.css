@@ -161,3 +161,21 @@
 .faith-keyboard-hint{margin:0;padding:9px 22px 15px;border-top:1px solid var(--line);color:var(--soft);font-size:.72rem;line-height:1.5}
 @media(max-width:600px){.faith-keyboard-hint{padding:9px 15px 13px;font-size:.69rem}}
 @media(prefers-reduced-motion:reduce){.faith-progress>span{transition:none!important}}
+
+
+/* Web Design Guidelines — alvos de toque de pelo menos 44×44 px sem alterar
+   a hierarquia editorial do carrossel e dos controles de gratidão. */
+.faith-topic,.faith-favorite-filter,.faith-save,.faith-history-toggle{
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.faith-round{width:44px;height:44px;min-width:44px;flex:0 0 44px}
+.faith-note button{min-width:44px;min-height:44px;display:inline-grid;place-items:center}
+@media(max-width:600px){
+  .faith-topic{min-height:44px}
+  .faith-round{width:44px;height:44px}
+  .faith-feature-footer{gap:10px}
+  .faith-main-actions{min-width:0;flex-wrap:wrap;justify-content:flex-end}
+}
