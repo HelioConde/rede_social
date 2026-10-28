@@ -1,0 +1,263 @@
+/*
+ * Rede Jovem — identidade inclusiva e personalizável
+ * Temas são preferências visuais: não dependem de gênero ou perfil.
+ * Esta camada preserva os componentes e a lógica do MVP existente.
+ */
+
+.app-shell{
+  --personal-ink:#3556ba;
+  --personal-ink-strong:#28449c;
+  --personal-soft:#eaf0ff;
+  --personal-edge:#cfdbf8;
+  --personal-support:#19899a;
+  --personal-banner:linear-gradient(115deg,#eaf0ff 0%,#f8fbff 57%,#dfeeff 100%);
+  --personal-right:linear-gradient(150deg,#263b65,#315ba2 60%,#217f94);
+  --personal-main:#254277;
+  --personal-surface:#eff6ff;
+  --personal-surface-second:#effaf9;
+}
+:root[data-accent="oceano"] .app-shell{
+  --personal-ink:#087c98;
+  --personal-ink-strong:#075c75;
+  --personal-soft:#e4f6fb;
+  --personal-edge:#b7dce9;
+  --personal-support:#198879;
+  --personal-banner:linear-gradient(115deg,#e3f8ff 0%,#f5fdff 54%,#d9f6ed 100%);
+  --personal-right:linear-gradient(150deg,#174c6b,#087fa1 62%,#199a8d);
+  --personal-main:#134c63;
+  --personal-surface:#e8f7fc;
+  --personal-surface-second:#e9fbf5;
+}
+:root[data-accent="floresta"] .app-shell{
+  --personal-ink:#236f58;
+  --personal-ink-strong:#1b5644;
+  --personal-soft:#e8f6ec;
+  --personal-edge:#c5e1d0;
+  --personal-support:#6b8746;
+  --personal-banner:linear-gradient(115deg,#eaf7ed 0%,#f9fcf7 55%,#e2f1df 100%);
+  --personal-right:linear-gradient(150deg,#214b42,#26765b 62%,#588d63);
+  --personal-main:#224a42;
+  --personal-surface:#eef8f0;
+  --personal-surface-second:#f2f8e8;
+}
+:root[data-accent="aurora"] .app-shell{
+  --personal-ink:#7753bf;
+  --personal-ink-strong:#5e3b9e;
+  --personal-soft:#f4ebff;
+  --personal-edge:#e7d4f5;
+  --personal-support:#b65d7b;
+  --personal-banner:linear-gradient(115deg,#f4eaff 0%,#fbf4fe 55%,#fce9eb 100%);
+  --personal-right:linear-gradient(150deg,#6745ab,#9763cb 62%,#bb759e);
+  --personal-main:#49356f;
+  --personal-surface:#f3edff;
+  --personal-surface-second:#fff3ef;
+}
+
+/* Consistência no modo escuro sem forçar o uso de uma paleta */
+:root[data-theme="dark"] .app-shell{
+  --personal-banner:linear-gradient(115deg,#232d47 0%,#27334a 54%,#203c4b 100%);
+  --personal-main:#f1f5ff;
+  --personal-surface:#28334a;
+  --personal-surface-second:#263941;
+  --personal-soft:#2b3651;
+  --personal-edge:#394962;
+}
+:root[data-theme="dark"][data-accent="oceano"] .app-shell{
+  --personal-banner:linear-gradient(115deg,#183843 0%,#213d4a 55%,#1b4d4b 100%);
+  --personal-surface:#1b3a45;--personal-surface-second:#214840;
+  --personal-edge:#345968;
+}
+:root[data-theme="dark"][data-accent="floresta"] .app-shell{
+  --personal-banner:linear-gradient(115deg,#1c3833 0%,#263d3b 55%,#2c493b 100%);
+  --personal-surface:#254137;--personal-surface-second:#2b4538;
+  --personal-edge:#3b584c;
+}
+:root[data-theme="dark"][data-accent="aurora"] .app-shell{
+  --personal-banner:linear-gradient(115deg,#312843 0%,#36304b 55%,#4c354a 100%);
+  --personal-surface:#372d48;--personal-surface-second:#403045;
+  --personal-edge:#594866;
+}
+
+/* Navegação, marca e controles primários */
+.app-shell .brand strong{color:var(--personal-ink)}
+.app-shell .brand-symbol{background:linear-gradient(135deg,var(--personal-ink-strong),var(--personal-ink))}
+.app-shell .side-link.active{color:var(--personal-ink);border-color:var(--personal-edge);background:var(--personal-soft)}
+.app-shell .side-link.active::before{background:var(--personal-ink)}
+.app-shell .top-personalize{border:1px solid var(--line);background:var(--surface);border-radius:50%}
+.app-shell .pill{color:var(--personal-ink-strong);background:var(--personal-soft);border-color:var(--personal-edge)}
+.app-shell .btn.primary{background:var(--personal-ink);box-shadow:0 6px 15px color-mix(in srgb,var(--personal-ink) 18%,transparent)}
+.app-shell .btn.primary:hover:not(:disabled){background:var(--personal-ink-strong)}
+.app-shell .segmented button.selected{color:var(--personal-ink)}
+.app-shell .bottom-nav button.active{color:var(--personal-ink);background:var(--personal-soft)}
+.app-shell .upload-label,.app-shell .send-icon,.app-shell .eyebrow{color:var(--personal-ink)}
+.app-shell .sidebar .side-hint{
+  background:var(--personal-surface);color:var(--personal-ink);border-color:var(--personal-edge)
+}
+.app-shell .sidebar .side-hint strong{color:var(--text)}
+.app-shell .sidebar .side-hint p{color:var(--muted)}
+.app-shell .contacts-header span{background:var(--personal-soft);color:var(--personal-ink)}
+.app-shell .chat-window .bubble.own{background:var(--personal-ink)}
+.app-shell .avatar{background:linear-gradient(145deg,var(--avatar-color),var(--personal-ink))}
+
+/* Boas-vindas com elementos geométricos que representam conexões */
+.app-shell .feed-welcome{
+  background:var(--personal-banner);
+  border-color:var(--personal-edge);
+  min-height:207px;
+  box-shadow:0 12px 38px rgba(41,70,110,.035);
+}
+.app-shell .feed-welcome::after{content:none}
+.app-shell .feed-welcome h1{color:var(--personal-main)}
+.app-shell .feed-welcome h1 .welcome-name{color:var(--personal-ink-strong)}
+.app-shell .feed-welcome h1 .welcome-sparkle{color:var(--personal-support)}
+.app-shell .feed-welcome .eyebrow{color:var(--personal-ink-strong)}
+.app-shell .feed-welcome p{color:#58667c;max-width:490px}
+.app-shell .welcome-caption{color:var(--personal-ink-strong);background:rgba(255,255,255,.65);border-color:rgba(255,255,255,.8)}
+.app-shell .welcome-pulse{background:var(--personal-support)}
+.app-shell .welcome-decoration{right:0;left:auto;width:45%;height:100%;z-index:0;pointer-events:none}
+.app-shell .network-ring{
+  position:absolute;display:block;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--personal-ink) 22%,transparent);
+}
+.app-shell .ring-one{width:230px;height:230px;right:-18px;top:-85px}
+.app-shell .ring-two{width:172px;height:172px;right:95px;top:45px;border-style:dashed;opacity:.63}
+.app-shell .network-core{
+  position:absolute;display:grid;place-items:center;width:100px;height:100px;right:85px;top:65px;
+  border-radius:31px;background:color-mix(in srgb,var(--personal-ink) 13%,white);
+  border:1px solid color-mix(in srgb,var(--personal-ink) 16%,white);
+  color:var(--personal-ink);transform:rotate(-13deg);
+  box-shadow:0 16px 36px color-mix(in srgb,var(--personal-ink) 10%,transparent);
+}
+.app-shell .network-core svg{transform:rotate(13deg);stroke-width:1.5}
+.app-shell .network-node{
+  position:absolute;display:block;border-radius:50%;background:var(--personal-support);
+  border:4px solid color-mix(in srgb,var(--personal-support) 15%,white);
+}
+.app-shell .node-one{height:20px;width:20px;right:30px;top:33px}
+.app-shell .node-two{height:17px;width:17px;right:252px;top:126px}
+.app-shell .node-three{height:12px;width:12px;right:38px;bottom:19px;background:var(--personal-ink)}
+:root[data-theme="dark"] .app-shell .feed-welcome h1,
+:root[data-theme="dark"] .app-shell .feed-welcome h1 .welcome-name,
+:root[data-theme="dark"] .app-shell .feed-welcome .eyebrow{color:#f1f6ff}
+:root[data-theme="dark"] .app-shell .feed-welcome p{color:#ccd7e3}
+:root[data-theme="dark"] .app-shell .welcome-caption{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.18);color:#e1eaf5}
+:root[data-theme="dark"] .app-shell .network-core{
+  background:color-mix(in srgb,var(--personal-ink) 13%,#283144);
+  color:#dbe9ff;border-color:rgba(255,255,255,.16);
+}
+:root[data-theme="dark"] .app-shell .brand strong,
+:root[data-theme="dark"] .app-shell .side-link.active,
+:root[data-theme="dark"] .app-shell .segmented button.selected,
+:root[data-theme="dark"] .app-shell .top-personalize{color:#d4dfff}
+:root[data-theme="dark"] .app-shell .pill{color:#d4dfff}
+:root[data-theme="dark"] .app-shell .btn.primary{color:#fff}
+:root[data-theme="dark"] .app-shell .btn.primary:hover:not(:disabled){filter:brightness(1.16)}
+:root[data-theme="dark"] .app-shell .network-node{border-color:#253c50}
+
+/* Chamadas secundárias e painel lateral */
+.app-shell .feed-quick-actions .online-invite{background:var(--personal-surface)!important;border:1px solid var(--personal-edge)!important}
+.app-shell .feed-quick-actions .faith-quick{background:var(--personal-surface-second);border-color:var(--line)}
+.app-shell .feed-quick-actions .quick-icon{background:var(--personal-soft);color:var(--personal-ink)}
+.app-shell .feed-quick-actions .faith-quick-icon{background:color-mix(in srgb,var(--personal-support) 15%,white);color:var(--personal-support)}
+.app-shell .feed-quick-actions strong{color:var(--text)}
+.app-shell .feed-quick-actions p{color:var(--muted)}
+.app-shell .feed-quick-actions .online-invite a,
+.app-shell .feed-quick-actions .faith-quick button{
+  background:none!important;box-shadow:none!important;color:var(--personal-ink)!important
+}
+.app-shell .welcome-art{background:var(--personal-right);box-shadow:0 14px 30px rgba(24,53,78,.13)}
+.app-shell .welcome-art strong em{color:#c9f6ee}
+.app-shell .welcome-art button{color:var(--personal-ink-strong)}
+.app-shell .welcome-art .right-feature-decoration{
+  opacity:.15;font-size:initial;line-height:initial;right:0;bottom:17px;color:#fff;
+}
+.app-shell .welcome-art .right-feature-decoration svg{width:110px;height:110px;stroke-width:1.1}
+.app-shell .welcome-art .right-feature-overline{color:#e9f5ff}
+
+/* Seletor de paletas persistente e acessível na página de configurações */
+.app-shell .accent-picker{
+  border:0;border-top:1px solid var(--line);margin:19px 0 0;padding:20px 0 0;min-width:0
+}
+.app-shell .accent-picker legend{padding:0 0 5px;font-weight:800;color:var(--text);font-size:.9rem}
+.app-shell .accent-options{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:10px
+}
+.app-shell .accent-option{
+  display:flex;align-items:center;gap:12px;text-align:left;padding:12px;min-height:69px;
+  border:1.5px solid var(--line);border-radius:15px;background:var(--surface);
+  color:var(--text);width:100%;min-width:0;
+}
+.app-shell .accent-option:hover{border-color:var(--personal-ink);background:var(--surface-hover)}
+.app-shell .accent-option.selected{border-color:var(--personal-ink);background:var(--personal-soft)}
+.app-shell .accent-swatch{
+  display:block;flex:none;height:37px;width:37px;border-radius:12px;
+  background:linear-gradient(135deg,var(--swatch-one) 0%,var(--swatch-one) 50%,var(--swatch-two) 50%,var(--swatch-two) 100%);
+  border:2px solid rgba(255,255,255,.7);
+  box-shadow:0 1px 5px rgba(0,0,0,.09)
+}
+.app-shell .accent-option-copy{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.app-shell .accent-option-copy strong{font-size:.87rem;font-weight:780}
+.app-shell .accent-option-copy small{font-size:.72rem;color:var(--muted)}
+.app-shell .accent-option>svg{color:var(--personal-ink);flex:none}
+.app-shell .accent-help{font-size:.78rem;color:var(--muted);margin-top:14px;line-height:1.5}
+:root[data-theme="dark"] .app-shell .accent-option.selected{color:var(--text)}
+:root[data-theme="dark"] .app-shell .accent-option>svg{color:#d4dfff}
+
+/* A área online também recebe os tons escolhidos quando existe preferência local */
+.online-root{
+  --online-personal:#3556ba;
+  --online-personal-deep:#28449c;
+  --online-personal-soft:#eaf0ff;
+  --online-personal-banner:linear-gradient(115deg,#eaf0ff,#f8fbff 56%,#dfeeff);
+  --online-personal-right:linear-gradient(140deg,#263b65,#315ba2);
+}
+:root[data-accent="oceano"] .online-root{
+  --online-personal:#087c98;--online-personal-deep:#075c75;--online-personal-soft:#e4f6fb;
+  --online-personal-banner:linear-gradient(115deg,#e3f8ff,#f5fdff 56%,#d9f6ed);
+}
+:root[data-accent="floresta"] .online-root{
+  --online-personal:#236f58;--online-personal-deep:#1b5644;--online-personal-soft:#e8f6ec;
+  --online-personal-banner:linear-gradient(115deg,#eaf7ed,#f9fcf7 56%,#e2f1df);
+}
+:root[data-accent="aurora"] .online-root{
+  --online-personal:#7753bf;--online-personal-deep:#5e3b9e;--online-personal-soft:#f4ebff;
+  --online-personal-banner:linear-gradient(115deg,#f4eaff,#fbf4fe 56%,#fce9eb);
+}
+.online-root .online-logo strong,
+.online-root .online-hero h1 em,
+.online-root .online-kicker,
+.online-root .online-hero .online-kicker,
+.online-root .online-footer a,
+.online-root .online-switch{color:var(--online-personal)}
+.online-root .online-logo-mark{background:linear-gradient(135deg,var(--online-personal-deep),var(--online-personal))}
+.online-root .online-hero{background:var(--online-personal-banner);border-color:var(--online-personal-soft)}
+.online-root .online-primary,.online-root .online-filter>button.active,
+.online-root .online-comment-form button{background:var(--online-personal);border-color:var(--online-personal)}
+.online-root .online-primary:hover{background:var(--online-personal-deep)}
+.online-root .online-avatar{background:var(--online-personal-soft);color:var(--online-personal-deep)}
+
+/* Tamanho de toque e layout reduzido */
+@media(max-width:850px){
+  .app-shell .top-personalize{min-width:40px;min-height:40px}
+}
+@media(max-width:600px){
+  .app-shell .top-personalize{display:none}
+  .app-shell .welcome-decoration{width:42%;opacity:.42}
+  .app-shell .network-core{width:80px;height:80px;right:18px;top:70px;border-radius:23px}
+  .app-shell .network-core svg{width:37px;height:37px}
+  .app-shell .ring-one{right:-65px;top:-61px}
+  .app-shell .ring-two{right:10px;top:43px;width:134px;height:134px}
+  .app-shell .node-two{right:139px;top:129px}
+  .app-shell .feed-welcome p{max-width:340px}
+  .app-shell .accent-options{grid-template-columns:1fr 1fr;gap:9px}
+  .app-shell .accent-option{padding:10px 9px;gap:8px}
+  .app-shell .accent-swatch{width:30px;height:30px}
+  .app-shell .accent-option-copy strong{font-size:.79rem}
+  .app-shell .accent-option-copy small{font-size:.66rem}
+}
+@media(max-width:355px){
+  .app-shell .accent-options{grid-template-columns:1fr}
+  .app-shell .welcome-decoration{opacity:.2}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-shell .accent-option,.app-shell .network-core{animation:none!important;transition:none!important}
+}
