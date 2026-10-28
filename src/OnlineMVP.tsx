@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Heart, MessageCircle, Send, RefreshCw,
   ShieldCheck, LogOut, Trash2, Flag, Sparkles, Pencil, Check,
-  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff, UserX, UserCheck
+  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff, UserX, UserCheck, ClipboardCheck
 } from 'lucide-react';
 import { createClient, type Session } from '@supabase/supabase-js';
 import './online.css';
+import {ModerationPanel} from './ModerationPanel';
 
 const endpoint = import.meta.env.VITE_SUPABASE_URL?.trim();
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
@@ -40,6 +41,8 @@ export function OnlineMVP() {
   const [mutedProfiles, setMutedProfiles] = useState<Person[]>([]);
   const [mutesReady, setMutesReady] = useState(false);
   const [mutesError, setMutesError] = useState('');
+  const [isModerator,setIsModerator]=useState(false);
+  const [moderationOpen,setModerationOpen]=useState(false);
   const [posts, setPosts] = useState<Entry[]>([]);
   const [likes, setLikes] = useState<Like[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -165,6 +168,19 @@ export function OnlineMVP() {
     void loadMutes();
     return ()=>{active=false};
   },[uid,version]);
+
+  useEffect(()=>{
+    if(!api||!uid){setIsModerator(false);setModerationOpen(false);return;}
+    const client=api;
+    let active=true;
+    async function checkModerator(){
+      const result=await client.from('rj_moderators').select('user_id')
+        .eq('user_id',uid).maybeSingle();
+      if(active)setIsModerator(!result.error&&!!result.data);
+    }
+    void checkModerator();
+    return ()=>{active=false};
+  },[uid]);
 
   function refresh() { setPage(0);setHasMore(false);setVersion(v => v + 1); }
   async function task(key: string, fn: () => Promise<void>) {
@@ -411,6 +427,8 @@ export function OnlineMVP() {
       </section> : <div className="online-layout">
         <aside className="online-about">
           <div className="online-panel online-identity"><div className="online-avatar large">{avatar(me.name)}</div><h2>{me.name}</h2><span>@{me.handle}</span><p>{me.bio || 'Faça sua apresentação para a comunidade.'}</p><div className="online-stats"><strong>{ownPosts}</strong><span>Publicações</span></div><button className="online-ghost" onClick={startProfile}><Pencil size={16}/> Editar perfil</button></div>
+          {isModerator&&<button className="online-ghost moderation-entry" type="button" aria-expanded={moderationOpen}
+            onClick={()=>setModerationOpen(v=>!v)}><ClipboardCheck size={18}/> {moderationOpen?'Fechar fila de denúncias':'Revisar denúncias'}</button>}
           <div className="online-panel online-rules"><ShieldCheck size={22}/><h3>Um espaço de respeito</h3><p>Evite dados pessoais. Denuncie conteúdo ofensivo ou spam; a equipe precisará analisar as denúncias manualmente.</p><span className="online-small">MVP · Acesso autenticado · Sem mensagens privadas nesta fase</span></div>
           <div className="online-panel online-muted-list">
             <div className="online-muted-head"><UserX size={19}/><h3>Pessoas silenciadas</h3></div>
@@ -423,6 +441,8 @@ export function OnlineMVP() {
           </div>
         </aside>
         <section className="online-feed" aria-label="Publicações da comunidade">
+          {isModerator&&moderationOpen&&api&&uid&&<ModerationPanel client={api} userId={uid}
+            onClose={()=>setModerationOpen(false)}/>}
           <form className="online-panel online-compose" onSubmit={publish}>
             <div className="online-compose-header"><div className="online-avatar">{avatar(me.name)}</div><div><strong>Compartilhe seu momento</strong><span>O que você tem de novo?</span></div></div>
             <textarea value={draft} onChange={e => setDraft(e.target.value)} maxLength={2000} rows={3} aria-label="Escrever publicação online" placeholder="Uma novidade, conquista ou ideia para compartilhar..."/>

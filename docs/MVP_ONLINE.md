@@ -12,6 +12,7 @@ A aplicação original (#feed, #faith, #friends, #messages) continua sendo **dem
 2. No SQL Editor, aplique **nesta ordem**:
    - `supabase/rede_jovem_mvp.sql` (tabelas e políticas básicas)
    - `supabase/rede_jovem_controles_pessoais.sql` (silenciar perfis e permissões por coluna)
+   - `supabase/rede_jovem_moderacao.sql` (moderação humana e ocultação de conteúdo)
    Em seguida, confira todas as tabelas com RLS habilitado e consulte o Security Advisor. Verifique também as recomendações do Security Advisor.
 3. Em Supabase → Authentication → Providers → Email, mantenha confirmação de e-mail ligada. Configure CAPTCHA, limites de cadastro e um serviço SMTP antes de abrir para público; o SMTP padrão pode não suportar uso público. Defina em URL Configuration:
    - Site URL: `https://helioconde.github.io/rede_social/`
@@ -75,3 +76,11 @@ Se a tabela `rj_mutes` ainda não existir, a interface mantém o feed funcionand
 5. Verifique índices, grants e políticas pelo SQL Editor e execute os advisors de segurança e desempenho do Supabase. Não rode estes testes no banco `pizzaria-db`.
 
 Para lançar publicamente ainda faltam moderação administrativa, limites de taxa para escrita e estratégia de exclusão de contas/dados.
+
+## Moderação humana e cota do Supabase (fase 4)
+
+O painel de moderação e o SQL estão preparados, mas **não estão operacionais sem banco dedicado**. A tentativa de criar um projeto independente foi recusada porque a conta atingiu o limite de 2 projetos gratuitos ativos, embora a organização visível só mostre `pizzaria-db`. Nenhum projeto existente foi pausado ou excluído.
+
+A moderação precisa de um terceiro script, `supabase/rede_jovem_moderacao.sql`, aplicado somente no projeto novo após os dois anteriores. Moderadores são nomeados por SQL administrativo; visitantes comuns não conseguem se promover. O painel permite revisar denúncias e ocultar posts sem apagar automaticamente seu conteúdo. **O atual `ON DELETE CASCADE` de denúncias impede considerar o histórico uma trilha auditável permanente.** Ver [procedimento e limitações](MODERACAO_OPERACIONAL.md).
+
+Para desbloquear a criação, será necessário liberar uma vaga gratuita em algum projeto da conta (somente após revisão e sua autorização), ou aprovar um plano com custo. Não reutilize o banco da pizzaria como atalho.
