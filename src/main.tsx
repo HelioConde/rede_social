@@ -4,7 +4,7 @@ import {
   Home, Users, MessageCircle, Search, Compass, Settings, Bell, Moon, Sun, Menu, X,
   Heart, Send, ImagePlus, MessageSquare, Trash2, Pencil, Check, UserRound,
   Download, Upload, RotateCcw, ChevronDown, Camera, ShieldCheck, Sparkles,
-  CheckCircle2, UserPlus, MapPin, Share2, BookOpen, Palette
+  CheckCircle2, UserPlus, MapPin, Share2, BookOpen, Palette, Bookmark, ArrowDownUp
 } from 'lucide-react';
 import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
@@ -15,6 +15,7 @@ import { FaithHub } from './FaithHub';
 import { faithPalettes, type FaithPalette } from './faith-content';
 import './refresh.css';
 import './personalization.css';
+import './feed-experience.css';
 
 const BASE=import.meta.env.BASE_URL;
 type AccentId='indigo'|'oceano'|'floresta'|'aurora';
@@ -80,7 +81,8 @@ function App(){
   const [chatDrafts,setChatDrafts]=useState<Record<string,string>>({});
   const [selectedProfile,setSelectedProfile]=useState<string>('me');
   const [savingError,setSavingError]=useState(false);
-  const [filter,setFilter]=useState<'all'|'friends'>('all');
+  const [filter,setFilter]=useState<'all'|'friends'|'saved'>('all');
+  const [feedOrder,setFeedOrder]=useState<'recent'|'popular'>('recent');
   const uploadInput=useRef<HTMLInputElement>(null);
   const backupInput=useRef<HTMLInputElement>(null);
   const me=data.profiles.find(p=>p.id===data.activeId)||data.profiles[0];
@@ -88,11 +90,17 @@ function App(){
   const friends=data.friendships.filter(f=>f.status==='friends').map(f=>findUser(f.userId)).filter((x):x is Profile=>!!x);
   const incoming=data.friendships.filter(f=>f.status==='pending').length;
   const query=search.trim().toLocaleLowerCase('pt-BR');
+  const savedIds=data.savedPostIds?.[me.id]||[];
   const visiblePosts=useMemo(()=>data.posts.filter(p=>{
     const author=data.profiles.find(u=>u.id===p.authorId);
-    return (filter==='all'||p.authorId===me.id||friends.some(f=>f.id===p.authorId)) &&
-      (!query||p.body.toLocaleLowerCase('pt-BR').includes(query)||(author?.name.toLocaleLowerCase('pt-BR').includes(query)??false));
-  }).sort((a,b)=>b.createdAt-a.createdAt),[data.posts,data.profiles,filter,query,me.id,data.friendships]);
+    const inScope=filter==='all'||(filter==='saved'
+      ?(data.savedPostIds?.[me.id]||[]).includes(p.id)
+      :p.authorId===me.id||data.friendships.some(f=>f.userId===p.authorId&&f.status==='friends'));
+    return inScope&&(!query||p.body.toLocaleLowerCase('pt-BR').includes(query)||(author?.name.toLocaleLowerCase('pt-BR').includes(query)??false));
+  }).sort((a,b)=>feedOrder==='popular'
+    ?b.likedBy.length-a.likedBy.length||b.createdAt-a.createdAt
+    :b.createdAt-a.createdAt),
+  [data.posts,data.profiles,data.friendships,data.savedPostIds,filter,query,me.id,feedOrder]);
   useEffect(()=>{
     let live=true;
     loadState().then(d=>{if(live){setData(d);setSelectedProfile(d.activeId);setReady(true)}});
@@ -103,7 +111,8 @@ function App(){
   useEffect(()=>{document.documentElement.dataset.accent=accent;try{localStorage.setItem('rede-jovem-accent-v1',accent)}catch{}},[accent]);
   useEffect(()=>{document.documentElement.dataset.palette=palette;try{localStorage.setItem('rede-jovem-palette',palette)}catch{}},[palette]);
   useEffect(()=>{
-    const onHash=()=>{setSection(getSection());setSidebar(false);window.scrollTo({top:0})};
+    const onHash=()=>{const next=location.hash.slice(1);if(!sections.includes(next as Section))return;
+      setSection(next as Section);setSidebar(false);window.scrollTo({top:0})};
     addEventListener('hashchange',onHash);return ()=>removeEventListener('hashchange',onHash);
   },[]);
   useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return ()=>clearTimeout(t)},[toast]);
@@ -148,6 +157,16 @@ function App(){
   function toggleLike(id:string){
     update(prev=>({...prev,posts:prev.posts.map(p=>p.id!==id?p:{...p,likedBy:p.likedBy.includes(prev.activeId)?p.likedBy.filter(x=>x!==prev.activeId):[...p.likedBy,prev.activeId]})}));
   }
+  function toggleBookmark(id:string){
+    const wasSaved=savedIds.includes(id);
+    update(prev=>{
+      const byProfile=prev.savedPostIds||{};
+      const current=byProfile[prev.activeId]||[];
+      return {...prev,savedPostIds:{...byProfile,
+        [prev.activeId]:current.includes(id)?current.filter(postId=>postId!==id):[...current,id].slice(-2000)}};
+    });
+    feedback(wasSaved?'Publicação removida dos salvos.':'Publicação salva neste navegador.');
+  }
   function comment(id:string){
     const body=(commentDrafts[id]||'').trim();
     if(!body)return;
@@ -156,7 +175,10 @@ function App(){
     setCommentDrafts(prev=>({...prev,[id]:''}));
     feedback('Comentário publicado localmente.');
   }
-  function removePost(id:string){if(!confirm('Excluir esta publicação do navegador?'))return;update(prev=>({...prev,posts:prev.posts.filter(p=>p.id!==id)}));feedback('Publicação excluída.')}
+  function removePost(id:string){if(!confirm('Excluir esta publicação do navegador?'))return;update(prev=>({...prev,
+    posts:prev.posts.filter(p=>p.id!==id),
+    savedPostIds:Object.fromEntries(Object.entries(prev.savedPostIds||{}).map(([user,ids])=>[user,ids.filter(item=>item!==id)]))
+  }));feedback('Publicação excluída.')}
   function savePost(id:string){
     const body=editPostBody.trim();if(!body||body.length>2000){feedback('Informe um texto de até 2.000 caracteres.');return}
     update(prev=>({...prev,posts:prev.posts.map(p=>p.id===id?{...p,body}:p)}));setEditPost(null);feedback('Publicação atualizada.');
@@ -207,6 +229,7 @@ function App(){
     const author=findUser(post.authorId);
     const mine=post.authorId===me.id;
     const liked=post.likedBy.includes(me.id);
+    const bookmarked=savedIds.includes(post.id);
     return <article className="card post-card" data-testid="post-card">
       <div className="post-head">
         <Avatar profile={author}/>
@@ -219,7 +242,8 @@ function App(){
       <div className="post-actions">
         <button className={'post-action '+(liked?'is-liked':'')} aria-pressed={liked} aria-label={liked?'Descurtir publicação':'Curtir publicação'} onClick={()=>toggleLike(post.id)}><Heart size={18} fill={liked?'currentColor':'none'}/> <span>{post.likedBy.length} <span className="desktop-label">Curtidas</span></span></button>
         <span className="post-action static"><MessageSquare size={18}/> {post.comments.length} <span className="desktop-label">Comentários</span></span>
-        <button className="post-action" onClick={()=>copyPost(post)} aria-label="Copiar publicação"><Share2 size={18}/><span className="desktop-label">Compartilhar</span></button>
+        <button className="post-action" onClick={()=>copyPost(post)} aria-label="Copiar publicação" title="Copiar texto da publicação"><Share2 size={18}/><span className="desktop-label">Copiar texto</span></button>
+        <button className={'post-action bookmark-action '+(bookmarked?'is-bookmarked':'')} onClick={()=>toggleBookmark(post.id)} aria-pressed={bookmarked} aria-label={bookmarked?'Remover dos salvos':'Salvar publicação'} title={bookmarked?'Remover dos salvos':'Salvar publicação neste navegador'}><Bookmark size={18} fill={bookmarked?'currentColor':'none'}/><span className="desktop-label">{bookmarked?'Salvo':'Salvar'}</span></button>
       </div>
       {post.comments.length>0&&<div className="comments">{post.comments.map(c=><div className="comment" key={c.id}><Avatar size="sm" profile={findUser(c.authorId)}/><div><strong>{findUser(c.authorId)?.name||'Pessoa'}</strong><span>{c.body}</span></div></div>)}</div>}
       <form className="comment-form" onSubmit={e=>{e.preventDefault();comment(post.id)}}>
@@ -294,8 +318,22 @@ function App(){
             {postImage&&<div className="attachment"><img alt="Prévia da imagem selecionada" src={postImage}/><button className="icon-btn" aria-label="Remover imagem" onClick={()=>setPostImage('')}><X size={18}/></button></div>}
             <div className="composer-bottom"><label className="upload-label" htmlFor="post-photo"><ImagePlus size={19}/> <span>Foto</span></label><input id="post-photo" ref={uploadInput} type="file" accept="image/*" onChange={e=>picture(e.target.files?.[0])}/><span className="compose-counter">{postBody.length}/2000</span><button className="btn primary" disabled={postUploading||(!postBody.trim()&&!postImage)} onClick={post}><Send size={16}/> Publicar</button></div>
           </section>
-          <div className="feed-header"><h2>Seu feed <span>{visiblePosts.length} publicações</span></h2><div className="segmented" aria-label="Filtrar publicações"><button onClick={()=>setFilter('all')} aria-pressed={filter==='all'} className={filter==='all'?'selected':''}>Todas</button><button onClick={()=>setFilter('friends')} aria-pressed={filter==='friends'} className={filter==='friends'?'selected':''}>Amigos</button></div></div>
-          <div className="feed-list">{visiblePosts.length?visiblePosts.map(post=><React.Fragment key={post.id}>{PostCard({post})}</React.Fragment>):<div className="card empty"><Search size={26}/><strong>Não encontramos publicações</strong><span>Experimente outro termo ou publique algo novo.</span></div>}</div>
+          <div className="feed-header"><h2>Seu feed <span>{visiblePosts.length} publicações</span></h2></div>
+          <div className="feed-toolbar" aria-label="Organizar publicações">
+            <div className="segmented" role="group" aria-label="Filtrar publicações">
+              <button onClick={()=>setFilter('all')} aria-pressed={filter==='all'} className={filter==='all'?'selected':''}>Todas</button>
+              <button onClick={()=>setFilter('friends')} aria-pressed={filter==='friends'} className={filter==='friends'?'selected':''}>Amigos</button>
+              <button onClick={()=>setFilter('saved')} aria-pressed={filter==='saved'} className={filter==='saved'?'selected':''}><Bookmark size={15}/> Salvos <span className="saved-count">{savedIds.length}</span></button>
+            </div>
+            <label className="feed-sort"><ArrowDownUp size={16}/><span className="visually-hidden">Ordenar publicações</span>
+              <select aria-label="Ordenar publicações" value={feedOrder} onChange={e=>setFeedOrder(e.target.value as 'recent'|'popular')}>
+                <option value="recent">Mais recentes</option><option value="popular">Mais curtidas</option>
+              </select>
+            </label>
+          </div>
+          {query&&<div className="feed-search-notice"><Search size={16}/><span>Busca ativa: <strong>{search.trim()}</strong></span><button onClick={()=>setSearch('')} type="button">Limpar busca <X size={14}/></button></div>}
+          {filter==='saved'&&<p className="saved-privacy-note"><Bookmark size={15}/> Publicações salvas ficam apenas neste navegador, separadas por perfil demonstrativo.</p>}
+          <div className="feed-list">{visiblePosts.length?visiblePosts.map(post=><React.Fragment key={post.id}>{PostCard({post})}</React.Fragment>):<div className="card empty feed-empty"><Bookmark size={26}/><strong>{filter==='saved'?'Você ainda não salvou publicações':'Não encontramos publicações'}</strong><span>{filter==='saved'?'Use o botão Salvar em uma publicação para encontrá-la aqui.':query?'Limpe sua busca ou tente outro termo.':'Experimente outro filtro ou publique algo novo.'}</span>{(filter!=='all'||query)&&<button className="btn secondary" type="button" onClick={()=>{setFilter('all');setSearch('')}}>Ver todas as publicações</button>}</div>}</div>
         </>}
         {section==='faith'&&<FaithHub palette={palette} onPalette={setPalette} favorites={data.faithFavorites||[]} onFavorite={toggleFaithFavorite} notes={data.gratitudeNotes||[]} onAddNote={addGratitude} onDeleteNote={deleteGratitude} onShare={shareFaith} readingProgress={data.readingProgress||{}} onToggleReading={toggleReading}/>}
         {section==='explore'&&<><div className="page-intro"><div><span className="eyebrow"><Compass size={14}/> DESCUBRA A REDE</span><h1>Explorar pessoas</h1><p>Conheça os perfis demonstrativos da comunidade.</p></div></div>{PeopleGrid({})}</>}
