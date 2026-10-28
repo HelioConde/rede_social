@@ -153,6 +153,7 @@ button,input,textarea{font-family:inherit}
 .app-shell .feed-quick-actions strong{font-size:.78rem;font-weight:830;color:#273551;line-height:1.3;display:block;margin:1px 0 5px}
 .app-shell .feed-quick-actions p{font-size:.72rem;line-height:1.4;color:#596478;margin:0 0 6px;max-width:250px}
 .app-shell .feed-quick-actions :is(a,button){font-size:.72rem;font-weight:800;color:#4266b3;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0;border:none;background:transparent;margin:1px 0 0;white-space:normal;text-align:left}
+.app-shell .feed-quick-actions .online-invite a{color:#4266b3!important;background:transparent!important;box-shadow:none!important}
 .app-shell .feed-quick-actions .faith-quick button{color:#a15f42}
 .app-shell .feed-quick-actions :is(a,button):hover{text-decoration:underline;background:transparent}
 :root[data-theme="dark"] .app-shell .feed-quick-actions .online-invite{background:#222b43!important;border-color:#3d4b6e!important}
@@ -160,6 +161,7 @@ button,input,textarea{font-family:inherit}
 :root[data-theme="dark"] .app-shell .feed-quick-actions strong{color:#f3f0ff}
 :root[data-theme="dark"] .app-shell .feed-quick-actions p{color:#c6bdc9}
 :root[data-theme="dark"] .app-shell .feed-quick-actions :is(a,button){color:#c5bbff}
+:root[data-theme="dark"] .app-shell .feed-quick-actions .online-invite a{color:#c5bbff!important}
 
 /* 6. EDITOR E FEED */
 .app-shell .composer{padding:20px 21px 16px;border-radius:23px}
