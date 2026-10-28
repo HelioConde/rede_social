@@ -18,6 +18,7 @@ test('comunidade desconfigurada permanece acessível e não solicita contas reai
 test('silenciar só filtra o feed, sem fingir bloquear contas',()=>{
   expect(code).toContain("from('rj_mutes')");
   expect(code).toContain("!mutedIds.includes(p.author_id)");
+  expect(code).toContain("!mutedIds.includes(c.author_id)");
   expect(code).toContain("eq('owner_id',uid)");
   expect(code).toContain('Pessoas silenciadas');
   expect(code).toContain('não substitui uma denúncia');
