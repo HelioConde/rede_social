@@ -335,6 +335,14 @@ function App(){
 }
 function RootApp() {
   const [online,setOnline]=useState(() => location.hash === '#comunidade' || (onlineConfigured && !location.hash));
+  useEffect(()=>{
+    try {
+      const saved=localStorage.getItem('rede-jovem-accent-v1');
+      document.documentElement.dataset.accent=ACCENTS.some(option=>option.id===saved)?saved!:'indigo';
+    } catch {
+      document.documentElement.dataset.accent='indigo';
+    }
+  },[]);
   useEffect(() => {
     const change = () => setOnline(location.hash === '#comunidade' || (onlineConfigured && !location.hash));
     addEventListener('hashchange',change);
