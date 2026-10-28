@@ -264,7 +264,7 @@ function App(){
     <div className="layout">
       <aside className={'sidebar '+(sidebar?'open':'')} aria-label="Navegação principal">
         <div className="sidebar-profile"><Avatar profile={me} size="lg"/><div><strong>{me.name}</strong><span>@{me.handle}</span></div></div>
-        <nav className="side-links"><a className="side-link" href="#comunidade"><Users size={20}/><span>Comunidade online</span></a>{NAV.map(item=><button key={item.id} onClick={()=>go(item.id)} className={'side-link '+(section===item.id?'active':'')} aria-current={section===item.id?'page':undefined}><item.icon size={20}/><span>{item.label}</span>{item.id==='friends'&&incoming>0&&<span className="nav-count">{incoming}</span>}</button>)}</nav>
+        <nav className="side-links" aria-label="Navegação principal"><a className="side-link" href="#comunidade"><Users size={20}/><span>Comunidade online</span></a>{NAV.map(item=><button key={item.id} onClick={()=>go(item.id)} className={'side-link '+(section===item.id?'active':'')} aria-current={section===item.id?'page':undefined}><item.icon size={20}/><span>{item.label}</span>{item.id==='friends'&&incoming>0&&<span className="nav-count">{incoming}</span>}</button>)}</nav>
         <div className="side-bottom"><div className="side-hint"><Sparkles size={18}/><div><strong>Seu espaço, suas ideias</strong><p>Experimente sem criar conta. Tudo fica neste navegador.</p></div></div><span className="sidebar-footer">Rede Jovem · Experiência local</span></div>
       </aside>
       {sidebar&&<button className="mobile-overlay" aria-label="Fechar menu" onClick={()=>setSidebar(false)}/>}
