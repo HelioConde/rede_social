@@ -60,3 +60,16 @@ test('layout da comunidade sem backend preserva telas menores',async({page})=>{
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth),String(width)).toBeLessThanOrEqual(1);
   }
 });
+
+
+test('revisões de moderação são atômicas com SECURITY INVOKER e preservação mínima',()=>{
+  const audit=readFileSync(resolve(process.cwd(),'supabase/rede_jovem_auditoria.sql'),'utf8');
+  const panel=readFileSync(resolve(process.cwd(),'src/ModerationPanel.tsx'),'utf8');
+  expect(audit).toContain("security invoker");
+  expect(audit).toContain("on delete set null");
+  expect(audit).toContain("alter table public.rj_reports alter column post_id drop not null");
+  expect(audit).toContain("grant execute on function public.rj_review_report(uuid,text) to authenticated");
+  expect(audit).toContain("insert into public.rj_report_reviews");
+  expect(panel).toContain("client.rpc('rj_review_report'");
+  expect(panel).not.toContain("from('rj_post_moderation').insert(");
+});
