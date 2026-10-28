@@ -34,3 +34,23 @@
 @media(prefers-reduced-motion:reduce){
   .online-root :is(.online-report-form,.online-edit-post,.online-pagination) *{transition:none!important;animation:none!important}
 }
+
+/* Preferências pessoais: cards discretos, úteis sem ocupar o feed */
+.online-root .online-muted-list{padding:19px 18px}
+.online-root .online-muted-head{display:flex;align-items:center;gap:9px;color:var(--online-personal,#3556ba)}
+.online-root .online-muted-head h3{font-size:.91rem;margin:0}
+.online-root .online-muted-list>.online-small{margin:12px 0 0}
+.online-root .online-muted-items{margin-top:13px;display:grid;gap:10px}
+.online-root .online-muted-item{display:flex;gap:7px;align-items:center;justify-content:space-between;min-width:0;border-top:1px solid var(--on-border);padding-top:10px}
+.online-root .online-muted-item span{font-size:.79rem;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.online-root .online-muted-item .online-ghost{font-size:.72rem;flex:none;padding:8px 11px;min-height:37px}
+.online-root .online-muted-footnote{display:flex;align-items:center;gap:8px;color:var(--on-muted);font-size:.76rem;line-height:1.5;flex-wrap:wrap}
+.online-root .online-muted-footnote svg{flex:none;color:var(--online-personal,#3556ba)}
+.online-root .online-muted-list :is(button,input):focus-visible{outline:3px solid var(--online-personal,#3556ba);outline-offset:2px}
+@media(max-width:800px){
+  .online-root .online-muted-list{grid-column:1 / -1}
+}
+@media(max-width:560px){
+  .online-root .online-muted-list{padding:16px}
+  .online-root .online-muted-item{flex-wrap:wrap}
+}
