@@ -4,7 +4,7 @@ import {
   Home, Users, MessageCircle, Search, Compass, Settings, Bell, Moon, Sun, Menu, X,
   Heart, Send, ImagePlus, MessageSquare, Trash2, Pencil, Check, UserRound,
   Download, Upload, RotateCcw, ChevronDown, Camera, ShieldCheck, Sparkles,
-  LayoutGrid, CheckCircle2, UserPlus, MapPin, Share2, BookOpen
+  CheckCircle2, UserPlus, MapPin, Share2, BookOpen
 } from 'lucide-react';
 import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
