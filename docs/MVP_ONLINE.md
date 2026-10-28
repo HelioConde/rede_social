@@ -62,7 +62,7 @@ O arquivo `supabase/rede_jovem_controles_pessoais.sql` é obrigatório antes de 
 
 A mesma atualização restringe as permissões `INSERT` e `UPDATE` nas colunas das cinco tabelas básicas. A API de navegador não poderá atribuir manualmente `created_at` ou transferir o autor de um registro por um `UPDATE` comum. Isso complementa as políticas RLS, não as substitui.
 
-Silenciar alguém **somente oculta** suas publicações nesta interface. A pessoa ainda pode interagir com outros usuários; para abuso, use o recurso separado de denúncia, sujeito à análise humana. Não prometa bloqueio de contato, banimento, rate limit, privacidade de dados ou moderação automática.
+Silenciar alguém **somente oculta** suas publicações e comentários nesta interface. A pessoa ainda pode interagir com outros usuários; para abuso, use o recurso separado de denúncia, sujeito à análise humana. Não prometa bloqueio de contato, banimento, rate limit, privacidade de dados ou moderação automática.
 
 Se a tabela `rj_mutes` ainda não existir, a interface mantém o feed funcionando e informa que o recurso precisa ser ativado no banco dedicado.
 
