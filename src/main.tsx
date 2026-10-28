@@ -4,7 +4,7 @@ import {
   Home, Users, MessageCircle, Search, Compass, Settings, Bell, Moon, Sun, Menu, X,
   Heart, Send, ImagePlus, MessageSquare, Trash2, Pencil, Check, UserRound,
   Download, Upload, RotateCcw, ChevronDown, Camera, ShieldCheck, Sparkles,
-  CheckCircle2, UserPlus, MapPin, Share2, BookOpen
+  CheckCircle2, UserPlus, MapPin, Share2, BookOpen, Palette
 } from 'lucide-react';
 import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
@@ -14,8 +14,16 @@ import { OnlineMVP, onlineConfigured } from './OnlineMVP';
 import { FaithHub } from './FaithHub';
 import { faithPalettes, type FaithPalette } from './faith-content';
 import './refresh.css';
+import './personalization.css';
 
 const BASE=import.meta.env.BASE_URL;
+type AccentId='indigo'|'oceano'|'floresta'|'aurora';
+const ACCENTS:{id:AccentId;name:string;description:string;first:string;second:string}[]=[
+  {id:'indigo',name:'Índigo',description:'Azul e grafite',first:'#3555ba',second:'#48a8b8'},
+  {id:'oceano',name:'Oceano',description:'Azul e turquesa',first:'#087b9d',second:'#39c7b5'},
+  {id:'floresta',name:'Floresta',description:'Verde e esmeralda',first:'#206b5d',second:'#8cbf71'},
+  {id:'aurora',name:'Aurora',description:'Violeta e coral',first:'#7751c5',second:'#ea8b95'}
+];
 const NAV: {id:Section;label:string;icon:typeof Home}[]=[
   {id:'feed',label:'Início',icon:Home},
   {id:'faith',label:'Espaço Fé',icon:BookOpen},
@@ -52,6 +60,10 @@ function App(){
   const [search,setSearch]=useState('');
   const [mobileSearch,setMobileSearch]=useState(false);
   const [theme,setTheme]=useState(()=>{try{return localStorage.getItem('rede-jovem-theme-v3')==='dark'?'dark':'light'}catch{return 'light'}});
+  const [accent,setAccent]=useState<AccentId>(()=>{
+    try{const saved=localStorage.getItem('rede-jovem-accent-v1');return ACCENTS.some(a=>a.id===saved)?saved as AccentId:'indigo'}
+    catch{return 'indigo'}
+  });
   const [palette,setPalette]=useState<FaithPalette>(()=>{try{const v=localStorage.getItem('rede-jovem-palette');return faithPalettes.some(p=>p.id===v)?v as FaithPalette:'sereno'}catch{return 'sereno'}});
   const [sidebar,setSidebar]=useState(false);
   const [notify,setNotify]=useState(false);
@@ -88,6 +100,7 @@ function App(){
   },[]);
   useEffect(()=>{if(!ready)return;saveState(data).then(()=>setSavingError(false)).catch(e=>{console.warn(e);setSavingError(true)})},[data,ready]);
   useEffect(()=>{document.documentElement.dataset.theme=theme;try{localStorage.setItem('rede-jovem-theme-v3',theme)}catch{}},[theme]);
+  useEffect(()=>{document.documentElement.dataset.accent=accent;try{localStorage.setItem('rede-jovem-accent-v1',accent)}catch{}},[accent]);
   useEffect(()=>{document.documentElement.dataset.palette=palette;try{localStorage.setItem('rede-jovem-palette',palette)}catch{}},[palette]);
   useEffect(()=>{
     const onHash=()=>{setSection(getSection());setSidebar(false);window.scrollTo({top:0})};
@@ -254,6 +267,7 @@ function App(){
       <div className={"top-search "+(mobileSearch?"expanded":"")}><Search className="search-desktop-icon" size={19}/><button className="mobile-search-btn icon-btn" aria-label={mobileSearch?"Fechar busca":"Abrir busca"} aria-expanded={mobileSearch} onClick={()=>setMobileSearch(v=>!v)}>{mobileSearch?<X size={19}/>:<Search size={19}/>}</button><input aria-label="Pesquisar pessoas e publicações" placeholder="Pesquisar na Rede Jovem" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Limpar busca" onClick={()=>setSearch('')}><X size={15}/></button>}</div>
       <div className="top-actions">
         <Pill><ShieldCheck size={14}/> Modo demonstração</Pill>
+        <button className="icon-btn top-personalize" aria-label="Personalizar cores" title="Personalizar cores" onClick={()=>go('settings')}><Palette size={20}/></button>
         <button className="icon-btn top-theme" aria-label={theme==='dark'?'Ativar modo claro':'Ativar modo escuro'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={20}/>:<Moon size={20}/>}</button>
         <div className="notify-wrap"><button className="icon-btn notification-btn" aria-label="Notificações" aria-expanded={notify} onClick={()=>setNotify(v=>!v)}><Bell size={20}/>{incoming>0&&<span className="count">{incoming}</span>}</button>
           {notify&&<div className="notify-panel card"><strong>Notificações</strong><p>{incoming? `Você tem ${incoming} solicitação(ões) demonstrativa(s).`:'Nenhuma nova notificação.'}</p><button className="btn secondary" onClick={()=>{setNotify(false);go('friends')}}>Ver amizades</button></div>}
@@ -271,7 +285,7 @@ function App(){
       <main id="main" tabIndex={-1} className="content">
         {savingError&&<div role="alert" className="storage-warning">Não foi possível salvar seus dados. Exporte um backup antes de sair.</div>}
         {section==='feed'&&<>
-          <div className="page-intro feed-welcome"><div className="welcome-copy"><span className="eyebrow"><Sparkles size={15}/> SEU CANTINHO NA REDE</span><h1>Boas-vindas, <span className="welcome-name">{me.name.split(' ')[0]}!</span> <span className="welcome-sparkle">✳</span></h1><p>O melhor das conexões começa com um simples olá. O que vamos compartilhar hoje?</p><span className="welcome-caption"><span className="welcome-pulse"/> Um espaço para ser você</span></div><div className="welcome-decoration" aria-hidden="true"><span className="welcome-orbit orbit-a">✿</span><span className="welcome-orbit orbit-b">✦</span><span className="welcome-orbit orbit-c">✳</span></div></div>
+          <div className="page-intro feed-welcome"><div className="welcome-copy"><span className="eyebrow"><Sparkles size={15}/> SEU CANTINHO NA REDE</span><h1>Boas-vindas, <span className="welcome-name">{me.name.split(' ')[0]}!</span> <span className="welcome-sparkle">✦</span></h1><p>O melhor das conexões começa com um simples olá. O que vamos compartilhar hoje?</p><span className="welcome-caption"><span className="welcome-pulse"/> Um espaço para ser você</span></div><div className="welcome-decoration" aria-hidden="true"><span className="network-ring ring-one"/><span className="network-ring ring-two"/><span className="network-core"><Users size={46}/></span><span className="network-node node-one"/><span className="network-node node-two"/><span className="network-node node-three"/></div></div>
           <div className="feed-quick-actions">
             <div className="online-invite card"><span className="quick-icon community-icon"><Users size={20}/></span><div><strong>Comunidade em construção</strong><p>Conheça a experiência online que estamos preparando.</p><a href="#comunidade">Explorar comunidade <span aria-hidden="true">↗</span></a></div></div>
             <div className="faith-quick card"><span className="faith-quick-icon"><BookOpen size={20}/></span><div><strong>Seu momento de inspiração</strong><p>Reflexões, gratidão e palavras que acolhem.</p><button type="button" onClick={()=>go('faith')}>Conhecer Espaço Fé <span aria-hidden="true">↗</span></button></div></div>
@@ -291,14 +305,24 @@ function App(){
           {profileEditing&&<div className="card edit-profile"><h2>Editar perfil</h2><div className="form-grid"><label>Nome<input maxLength={60} value={profileForm.name} onChange={e=>setProfileForm(p=>({...p,name:e.target.value}))}/></label><label>Usuário<input maxLength={24} value={profileForm.handle} onChange={e=>setProfileForm(p=>({...p,handle:e.target.value}))}/></label><label className="span-2">Cidade<input maxLength={80} value={profileForm.city} onChange={e=>setProfileForm(p=>({...p,city:e.target.value}))}/></label><label className="span-2">Biografia<textarea maxLength={300} rows={3} value={profileForm.bio} onChange={e=>setProfileForm(p=>({...p,bio:e.target.value}))}/></label></div><div className="button-row"><button className="btn secondary" onClick={()=>setProfileEditing(false)}>Cancelar</button><button className="btn primary" onClick={saveProfile}><Check size={16}/> Salvar alterações</button></div></div>}
           <div className="section-heading"><h2>Minhas publicações</h2></div><div className="feed-list">{profilePosts.length?profilePosts.map(post=><React.Fragment key={post.id}>{PostCard({post})}</React.Fragment>):<div className="card empty"><MessageSquare size={24}/><strong>Você ainda não publicou</strong><button className="btn primary" onClick={()=>go('feed')}>Criar publicação</button></div>}</div></>}
         {section==='settings'&&<><div className="page-intro"><div><span className="eyebrow"><Settings size={14}/> CONTROLE LOCAL</span><h1>Configurações</h1><p>Personalize sua experiência e gerencie os dados deste navegador.</p></div></div>
-          <div className="card settings-card"><h2>Aparência</h2><p>Escolha o tema da Rede Jovem.</p><div className="settings-line"><span>{theme==='dark'?'Modo escuro':'Modo claro'}</span><button className="btn secondary" onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>} Alternar tema</button></div></div>
+          <div className="card settings-card"><h2>Aparência</h2><p>Deixe a Rede Jovem com a sua cara. Todas as paletas estão disponíveis para qualquer pessoa.</p>
+            <div className="settings-line"><span>{theme==='dark'?'Modo escuro':'Modo claro'}</span><button className="btn secondary" onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={17}/>:<Moon size={17}/>} Alternar tema</button></div>
+            <fieldset className="accent-picker"><legend>Cores da interface</legend>
+              <div className="accent-options">{ACCENTS.map(option=><button type="button" key={option.id} aria-label={'Paleta '+option.name} aria-pressed={accent===option.id} className={'accent-option '+(accent===option.id?'selected':'')} onClick={()=>setAccent(option.id)}>
+                <span className="accent-swatch" style={{'--swatch-one':option.first,'--swatch-two':option.second} as React.CSSProperties} aria-hidden="true"/>
+                <span className="accent-option-copy"><strong>{option.name}</strong><small>{option.description}</small></span>
+                {accent===option.id&&<Check size={17} aria-hidden="true"/>}
+              </button>)}</div>
+              <p className="accent-help">Sua preferência fica salva apenas neste navegador. Você pode mudar quando quiser.</p>
+            </fieldset>
+          </div>
           <div className="card settings-card"><h2>Perfil de demonstração</h2><p>Alterne entre as pessoas fictícias para experimentar interações. Isso não é autenticação real.</p><label className="select-label">Perfil ativo<select aria-label="Escolher perfil demonstrativo" value={selectedProfile} onChange={e=>switchProfile(e.target.value)}>{data.profiles.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label></div>
           <div className="card settings-card"><h2>Seus dados locais</h2><p>Publicações, imagens e conversas permanecem neste navegador. Não existe conta, sincronização ou servidor.</p><div className="settings-buttons"><button className="btn secondary" onClick={()=>downloadBackup(data)}><Download size={17}/> Exportar JSON</button><button className="btn secondary" onClick={()=>backupInput.current?.click()}><Upload size={17}/> Importar JSON</button><input hidden ref={backupInput} type="file" accept=".json,application/json" onChange={e=>importBackup(e.target.files?.[0])}/><button className="btn danger-btn" onClick={reset}><RotateCcw size={17}/> Restaurar demonstração</button></div></div>
           <div className="privacy-note"><ShieldCheck size={21}/><div><strong>Privacidade e limites</strong><p>Esta é uma rede social demonstrativa. Não informe senhas, dados sensíveis ou mensagens confidenciais. Outros visitantes não conseguem ver seus dados e você não recebe mensagens reais.</p></div></div>
         </>}
       </main>
       <aside className="rightbar" aria-label="Painel de contatos">
-        <div className="right-top"><div className="welcome-art"><span className="right-feature-overline"><Sparkles size={15}/> DESCUBRA</span><strong>Gente nova. <em>Ideias novas.</em></strong><span>Cada conexão pode render uma boa história.</span><button onClick={()=>go('explore')}>Conhecer pessoas <span aria-hidden="true">↗</span></button><span className="right-feature-decoration" aria-hidden="true">✳</span></div></div>
+        <div className="right-top"><div className="welcome-art"><span className="right-feature-overline"><Sparkles size={15}/> DESCUBRA</span><strong>Gente nova. <em>Ideias novas.</em></strong><span>Cada conexão pode render uma boa história.</span><button onClick={()=>go('explore')}>Conhecer pessoas <span aria-hidden="true">↗</span></button><span className="right-feature-decoration" aria-hidden="true"><Users size={98}/></span></div></div>
         <div className="contacts-header"><h2>Contatos</h2><span>{friends.length}</span></div>
         <div className="contacts">{friends.map(p=><button key={p.id} className="contact-mini" onClick={()=>openChat(p.id)}><Avatar profile={p} size="sm"/><span>{p.name}</span><MessageCircle size={16}/></button>)}</div>
         <div className="right-note"><ShieldCheck size={16}/><span>Sem conexão com servidor. Conversas são apenas locais.</span></div>
