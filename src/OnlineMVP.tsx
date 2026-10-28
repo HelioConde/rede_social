@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Heart, MessageCircle, Send, RefreshCw,
   ShieldCheck, LogOut, Trash2, Flag, Sparkles, Pencil, Check,
-  Users, Search, LockKeyhole
+  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff
 } from 'lucide-react';
 import { createClient, type Session } from '@supabase/supabase-js';
 import './online.css';
@@ -11,7 +11,7 @@ const endpoint = import.meta.env.VITE_SUPABASE_URL?.trim();
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
 // Publishable key only. NEVER bundle service_role or secret API keys.
 const api = endpoint && /^https:\/\/[a-z0-9.-]+$/i.test(endpoint) && publishableKey
-  ? createClient(endpoint, publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
+  ? createClient(endpoint, publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } })
   : null;
 
 export const onlineConfigured = Boolean(api);
@@ -23,11 +23,16 @@ type Comment = { id: string; post_id: string; author_id: string; content: string
 const errorText = (e: unknown) => e instanceof Error ? e.message : 'Ocorreu um erro. Tente novamente.';
 const shortDate = (date: string) => new Date(date).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 const avatar = (name: string) => (name.trim().charAt(0) || '?').toUpperCase();
+const PAGE_SIZE = 20;
+const recoveryMarker = () => new URLSearchParams(window.location.search).get('rj_recovery') === '1';
+type AuthMode = 'login' | 'cadastro' | 'recuperar';
 
 export function OnlineMVP() {
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [mode, setMode] = useState<'login' | 'cadastro'>('login');
+  const [mode, setMode] = useState<AuthMode>('login');
+  const [isRecovery, setIsRecovery] = useState(recoveryMarker);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [people, setPeople] = useState<Person[]>([]);
@@ -35,6 +40,10 @@ export function OnlineMVP() {
   const [likes, setLikes] = useState<Like[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [profileEditing, setProfileEditing] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editPostBody, setEditPostBody] = useState('');
+  const [reportingId, setReportingId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState<'spam' | 'abuso' | 'outro'>('spam');
   const [profileName, setProfileName] = useState('');
   const [profileHandle, setProfileHandle] = useState('');
   const [profileBio, setProfileBio] = useState('');
@@ -47,6 +56,9 @@ export function OnlineMVP() {
   const [error, setError] = useState('');
   const [version, setVersion] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [feedError, setFeedError] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const uid = session?.user.id;
   const me = people.find(p => p.id === uid);
   const byId = (id: string) => people.find(p => p.id === id);
@@ -74,37 +86,54 @@ export function OnlineMVP() {
   useEffect(() => {
     if (!api || !uid) {
       setPeople([]); setPosts([]); setLikes([]); setComments([]);
+      setPage(0);setFeedError('');setHasMore(false);
       return;
     }
     const client = api;
     let mounted = true;
     async function fetchFeed() {
       setLoading(true);
+      setFeedError('');
       try {
-        const [p, entries, l, c] = await Promise.all([
-          client.from('rj_profiles').select('id,handle,name,bio,created_at').limit(300),
-          client.from('rj_posts').select('id,author_id,content,created_at').order('created_at', {ascending: false}).limit(100),
-          client.from('rj_likes').select('post_id,user_id').limit(3000),
-          client.from('rj_comments').select('id,post_id,author_id,content,created_at').order('created_at', {ascending: true}).limit(3000)
+        const entries = await client.from('rj_posts')
+          .select('id,author_id,content,created_at')
+          .order('created_at', {ascending:false})
+          .order('id', {ascending:false})
+          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+        if (entries.error) throw entries.error;
+        const batch = (entries.data || []) as Entry[];
+        const postIds = batch.map(p => p.id);
+        const [l, c] = await Promise.all([
+          postIds.length ? client.from('rj_likes').select('post_id,user_id').in('post_id',postIds).limit(3000) : Promise.resolve({data:[] as Like[],error:null}),
+          postIds.length ? client.from('rj_comments').select('id,post_id,author_id,content,created_at').in('post_id',postIds).order('created_at',{ascending:true}).limit(3000) : Promise.resolve({data:[] as Comment[],error:null})
         ]);
-        const failure = p.error || entries.error || l.error || c.error;
-        if (failure) throw failure;
+        if (l.error || c.error) throw (l.error || c.error);
+        const newLikes = (l.data || []) as Like[];
+        const newComments = (c.data || []) as Comment[];
+        const authorIds = [...new Set([uid,...batch.map(p=>p.author_id),...newComments.map(p=>p.author_id)])];
+        const p = await client.from('rj_profiles').select('id,handle,name,bio,created_at').in('id',authorIds);
+        if(p.error) throw p.error;
+        const newPeople = (p.data || []) as Person[];
         if (mounted) {
-          setPeople((p.data || []) as Person[]);
-          setPosts((entries.data || []) as Entry[]);
-          setLikes((l.data || []) as Like[]);
-          setComments((c.data || []) as Comment[]);
+          setPeople(old => page===0 ? newPeople : [...old,...newPeople.filter(p => !old.some(x => x.id===p.id))]);
+          setPosts(old => page===0 ? batch : [...old,...batch.filter(p => !old.some(x=>x.id===p.id))]);
+          setLikes(old => page===0 ? newLikes : [...old,...newLikes]);
+          setComments(old => page===0 ? newComments : [...old,...newComments]);
+          setHasMore(batch.length === PAGE_SIZE);
           setError('');
         }
       } catch (e) {
-        if (mounted) setError('Falha ao carregar a comunidade: ' + errorText(e));
+        if (mounted) {
+          setFeedError('Não foi possível carregar as publicações. Tente novamente.');
+          setError('Falha ao carregar a comunidade: ' + errorText(e));
+        }
       } finally { if (mounted) setLoading(false); }
     }
     void fetchFeed();
     return () => { mounted = false; };
-  }, [uid, version]);
+  }, [uid, page, version]);
 
-  function refresh() { setVersion(v => v + 1); }
+  function refresh() { setPage(0);setHasMore(false);setVersion(v => v + 1); }
   async function task(key: string, fn: () => Promise<void>) {
     if (busy) return;
     setBusy(key); setError(''); setNotice('');
@@ -116,10 +145,16 @@ export function OnlineMVP() {
 
   async function authenticate(e: React.FormEvent) {
     e.preventDefault();
-    if (!api || password.length < 8) { setError('Informe uma senha de pelo menos 8 caracteres.'); return; }
+    if (!api) return;
+    if (mode !== 'recuperar' && password.length < 8) { setError('Informe uma senha de pelo menos 8 caracteres.'); return; }
     const client = api;
     await task('auth', async () => {
-      if (mode === 'cadastro') {
+      if (mode === 'recuperar') {
+        const redirect = window.location.origin + import.meta.env.BASE_URL + '?rj_recovery=1#comunidade';
+        const {error: resetError} = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), {redirectTo:redirect});
+        if(resetError) throw resetError;
+        setNotice('Se o e-mail estiver cadastrado, você receberá instruções para redefinir a senha.');
+      } else if (mode === 'cadastro') {
         const redirect = window.location.origin + import.meta.env.BASE_URL + '#comunidade';
         const {data, error: authError} = await client.auth.signUp({
           email: email.trim().toLowerCase(), password, options: {emailRedirectTo: redirect}
@@ -133,6 +168,24 @@ export function OnlineMVP() {
         setPassword('');
         setNotice('Bem-vindo à comunidade!');
       }
+    });
+  }
+
+  async function changeRecoveredPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!api || password.length < 8) {
+      setError('Escolha uma senha com pelo menos 8 caracteres.');
+      return;
+    }
+    await task('password-reset', async () => {
+      const {error: updateError} = await api.auth.updateUser({password});
+      if(updateError) throw updateError;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('rj_recovery');
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+      setIsRecovery(false);
+      setPassword('');
+      setNotice('Senha atualizada. Você já pode usar sua conta.');
     });
   }
 
@@ -197,6 +250,27 @@ export function OnlineMVP() {
       refresh();
     });
   }
+  async function updatePost(e: React.FormEvent, postId: string) {
+    e.preventDefault();
+    if (!api || !uid) return;
+    const content = editPostBody.trim();
+    if (!content || content.length > 2000) {setError('A publicação deve ter entre 1 e 2.000 caracteres.');return;}
+    const client=api;
+    await task('edit-'+postId, async () => {
+      const {error: updateError} = await client.from('rj_posts').update({content}).eq('id',postId).eq('author_id',uid);
+      if(updateError) throw updateError;
+      setEditingPostId(null);setNotice('Publicação atualizada.');refresh();
+    });
+  }
+  async function deleteComment(commentId: string) {
+    if(!api || !uid || !window.confirm('Excluir seu comentário?'))return;
+    const client=api;
+    await task('comment-delete-'+commentId,async ()=>{
+      const {error: deleteError} = await client.from('rj_comments').delete().eq('id',commentId).eq('author_id',uid);
+      if(deleteError)throw deleteError;
+      setNotice('Comentário excluído.');refresh();
+    });
+  }
   async function deletePost(postId: string) {
     if (!api || !uid || !window.confirm('Excluir sua publicação permanentemente?')) return;
     const client = api;
@@ -206,16 +280,15 @@ export function OnlineMVP() {
       setNotice('Publicação excluída.'); refresh();
     });
   }
-  async function reportPost(postId: string) {
+  async function reportPost(e: React.FormEvent, postId: string) {
+    e.preventDefault();
     if (!api || !uid) return;
-    const reason = window.prompt('Motivo da denúncia: spam, abuso ou outro', 'spam')?.trim().toLowerCase();
-    if (!reason) return;
-    if (!['spam','abuso','outro'].includes(reason)) { setError('Escolha spam, abuso ou outro.'); return; }
     const client = api;
     await task('report-' + postId, async () => {
-      const {error: saveError} = await client.from('rj_reports').insert({post_id: postId, reporter_id: uid, reason});
+      const {error: saveError} = await client.from('rj_reports').insert({post_id: postId, reporter_id: uid, reason:reportReason});
       if (saveError) throw saveError;
-      setNotice('Denúncia registrada para análise pela administração.');
+      setReportingId(null);
+      setNotice('Denúncia registrada. A equipe responsável precisará analisá-la.');
     });
   }
 
