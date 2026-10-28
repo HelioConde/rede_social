@@ -23,6 +23,9 @@ jobs:
       - name: Instalar dependências
         run: npm install --no-audit --no-fund
       - name: Verificação TypeScript e build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
       - name: Instalar Chromium para Playwright
         run: npx playwright install chromium

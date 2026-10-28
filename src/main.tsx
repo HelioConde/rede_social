@@ -10,6 +10,7 @@ import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
 import { downloadBackup, imageToDataUrl, isValidState, loadState, newId, saveState } from './storage';
 import './styles.css';
+import { OnlineMVP } from './OnlineMVP';
 import { FaithHub } from './FaithHub';
 import { faithPalettes, type FaithPalette } from './faith-content';
 
@@ -262,7 +263,7 @@ function App(){
     <div className="layout">
       <aside className={'sidebar '+(sidebar?'open':'')} aria-label="Navegação principal">
         <div className="sidebar-profile"><Avatar profile={me} size="lg"/><div><strong>{me.name}</strong><span>@{me.handle}</span></div></div>
-        <nav className="side-links">{NAV.map(item=><button key={item.id} onClick={()=>go(item.id)} className={'side-link '+(section===item.id?'active':'')} aria-current={section===item.id?'page':undefined}><item.icon size={20}/><span>{item.label}</span>{item.id==='friends'&&incoming>0&&<span className="nav-count">{incoming}</span>}</button>)}</nav>
+        <nav className="side-links"><a className="side-link" href="#comunidade"><Users size={20}/><span>Comunidade online</span></a>{NAV.map(item=><button key={item.id} onClick={()=>go(item.id)} className={'side-link '+(section===item.id?'active':'')} aria-current={section===item.id?'page':undefined}><item.icon size={20}/><span>{item.label}</span>{item.id==='friends'&&incoming>0&&<span className="nav-count">{incoming}</span>}</button>)}</nav>
         <div className="side-bottom"><div className="side-hint"><Sparkles size={18}/><div><strong>Seu espaço, suas ideias</strong><p>Experimente sem criar conta. Tudo fica neste navegador.</p></div></div><span className="sidebar-footer">Rede Jovem · Experiência local</span></div>
       </aside>
       {sidebar&&<button className="mobile-overlay" aria-label="Fechar menu" onClick={()=>setSidebar(false)}/>}
@@ -304,4 +305,13 @@ function App(){
     <nav className="bottom-nav" aria-label="Navegação mobile">{NAV.slice(0,5).map(n=><button className={section===n.id?'active':''} aria-label={n.label} aria-current={section===n.id?'page':undefined} key={n.id} onClick={()=>go(n.id)}><n.icon size={21}/><small>{n.label}</small></button>)}</nav>
   </div>;
 }
-createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
+function RootApp() {
+  const [online,setOnline]=useState(() => location.hash === '#comunidade');
+  useEffect(() => {
+    const change = () => setOnline(location.hash === '#comunidade');
+    addEventListener('hashchange',change);
+    return () => removeEventListener('hashchange',change);
+  },[]);
+  return online ? <OnlineMVP/> : <App/>;
+}
+createRoot(document.getElementById('root')!).render(<React.StrictMode><RootApp/></React.StrictMode>);
