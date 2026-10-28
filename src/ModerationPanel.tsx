@@ -2,7 +2,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react';
 import type {SupabaseClient} from '@supabase/supabase-js';
 import {CheckCircle2,EyeOff,Flag,RefreshCw,ShieldCheck,X} from 'lucide-react';
 
-type Report={id:string;post_id:string;reason:'spam'|'abuso'|'outro';created_at:string};
+type Report={id:string;post_id:string|null;reason:'spam'|'abuso'|'outro';created_at:string};
 type Review={report_id:string;moderator_id:string;decision:'dismissed'|'hidden';reviewed_at:string};
 type Post={id:string;content:string;author_id:string;created_at:string};
 type Hidden={post_id:string;created_at:string};
@@ -36,7 +36,7 @@ export function ModerationPanel({client,userId,onClose}:Props){
         if(r.error)throw r.error;
         const incoming=(r.data||[]) as Report[];
         const reportIds=incoming.map(x=>x.id);
-        const postIds=[...new Set(incoming.map(x=>x.post_id))];
+        const postIds=[...new Set(incoming.map(x=>x.post_id).filter((id):id is string=>id!==null))];
         const [reviewResult,postResult,hiddenResult]=await Promise.all([
           reportIds.length?client.from('rj_report_reviews')
             .select('report_id,moderator_id,decision,reviewed_at').in('report_id',reportIds)
@@ -71,16 +71,17 @@ export function ModerationPanel({client,userId,onClose}:Props){
     if(decision==='hidden'&&!window.confirm('Ocultar esta publicação do feed dos demais participantes?'))return;
     setBusy(true);setError('');setNotice('');
     try{
-      const alreadyHidden=hidden.some(x=>x.post_id===report.post_id);
-      if(decision==='hidden'&&!alreadyHidden){
-        const result=await client.from('rj_post_moderation')
-          .insert({post_id:report.post_id,moderator_id:userId});
-        if(result.error)throw result.error;
-      }
-      const result=await client.from('rj_report_reviews')
-        .insert({report_id:report.id,moderator_id:userId,decision});
-      if(result.error)throw result.error;
-      setNotice(decision==='hidden'?'Publicação ocultada; decisão registrada.':'Denúncia descartada e registrada.');
+      // Um único RPC com SECURITY INVOKER: o Postgres valida o moderador por RLS
+      // e conclui ocultação + registro em uma única transação.
+      const {error:reviewError}=await client.rpc('rj_review_report',{
+        p_report_id:report.id,
+        p_decision:decision
+      });
+      if(reviewError)throw reviewError;
+      setNotice(decision==='hidden'
+        ?'Publicação ocultada e decisão registrada em uma única operação.'
+        :'Denúncia descartada e decisão registrada.');
+
     }catch(e){
       setError(e instanceof Error?e.message:'Não foi possível salvar a decisão. Revise o estado da fila.');
     }finally{
@@ -107,11 +108,11 @@ export function ModerationPanel({client,userId,onClose}:Props){
     {loading?<p role="status">Carregando denúncias...</p>
       :pending.length===0?<div className="moderation-empty"><CheckCircle2 size={25}/><strong>Nenhuma denúncia pendente neste lote</strong><p>As próximas denúncias aparecerão aqui após a atualização.</p></div>
       :<div className="moderation-queue">{pending.map(report=>{
-        const post=posts.find(p=>p.id===report.post_id);
-        const isHidden=hidden.some(x=>x.post_id===report.post_id);
+        const post=report.post_id?posts.find(p=>p.id===report.post_id):undefined;
+        const isHidden=report.post_id!==null&&hidden.some(x=>x.post_id===report.post_id);
         return <article className="moderation-item" key={report.id}>
           <div className="moderation-meta"><span><Flag size={15}/> {report.reason==='abuso'?'Abuso ou assédio':report.reason==='spam'?'Spam':'Outro motivo'}</span><time dateTime={report.created_at}>{date(report.created_at)}</time></div>
-          <p className="moderation-excerpt">{post?.content||'Publicação indisponível. Verifique o registro antes de decidir.'}</p>
+          <p className="moderation-excerpt">{post?.content||(report.post_id===null?'Publicação excluída pelo autor. Denúncia preservada sem cópia do conteúdo.':'Publicação indisponível. Verifique o registro antes de decidir.')}</p>
           {isHidden&&<p className="moderation-hidden"><EyeOff size={16}/> Publicação já oculta</p>}
           <div className="moderation-actions">
             <button type="button" className="online-primary" disabled={busy||!post}
@@ -121,6 +122,6 @@ export function ModerationPanel({client,userId,onClose}:Props){
           </div>
         </article>;
       })}</div>}
-    <p className="online-small">A fila mostra os 50 registros mais recentes, incluindo os já revisados. Não há moderação automática nem banimento. Reversões e exclusões de conta exigem processo administrativo documentado.</p>
+    <p className="online-small">A fila mostra os 50 registros mais recentes, incluindo os já revisados. Denúncias de posts excluídos preservam apenas metadados mínimos. Não há moderação automática nem banimento; reversões e exclusões exigem procedimento administrativo.</p>
   </section>;
 }

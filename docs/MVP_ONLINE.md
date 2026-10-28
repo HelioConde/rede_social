@@ -13,6 +13,7 @@ A aplicação original (#feed, #faith, #friends, #messages) continua sendo **dem
    - `supabase/rede_jovem_mvp.sql` (tabelas e políticas básicas)
    - `supabase/rede_jovem_controles_pessoais.sql` (silenciar perfis e permissões por coluna)
    - `supabase/rede_jovem_moderacao.sql` (moderação humana e ocultação de conteúdo)
+   - `supabase/rede_jovem_auditoria.sql` (decisões atômicas e retenção mínima após exclusão)
    Em seguida, confira todas as tabelas com RLS habilitado e consulte o Security Advisor. Verifique também as recomendações do Security Advisor.
 3. Em Supabase → Authentication → Providers → Email, mantenha confirmação de e-mail ligada. Configure CAPTCHA, limites de cadastro e um serviço SMTP antes de abrir para público; o SMTP padrão pode não suportar uso público. Defina em URL Configuration:
    - Site URL: `https://helioconde.github.io/rede_social/`
@@ -81,6 +82,12 @@ Para lançar publicamente ainda faltam moderação administrativa, limites de ta
 
 O painel de moderação e o SQL estão preparados, mas **não estão operacionais sem banco dedicado**. A tentativa de criar um projeto independente foi recusada porque a conta atingiu o limite de 2 projetos gratuitos ativos, embora a organização visível só mostre `pizzaria-db`. Nenhum projeto existente foi pausado ou excluído.
 
-A moderação precisa de um terceiro script, `supabase/rede_jovem_moderacao.sql`, aplicado somente no projeto novo após os dois anteriores. Moderadores são nomeados por SQL administrativo; visitantes comuns não conseguem se promover. O painel permite revisar denúncias e ocultar posts sem apagar automaticamente seu conteúdo. **O atual `ON DELETE CASCADE` de denúncias impede considerar o histórico uma trilha auditável permanente.** Ver [procedimento e limitações](MODERACAO_OPERACIONAL.md).
+A moderação precisa de um terceiro script, `supabase/rede_jovem_moderacao.sql`, aplicado somente no projeto novo após os dois anteriores. Moderadores são nomeados por SQL administrativo; visitantes comuns não conseguem se promover. O painel permite revisar denúncias e ocultar posts sem apagar automaticamente seu conteúdo. **Com `rede_jovem_auditoria.sql`, excluir um post preserva o motivo/data da denúncia sem armazenar o conteúdo apagado; o histórico ainda exige prazo de retenção, controles de privacidade e processo de revisão.** Ver [procedimento e limitações](MODERACAO_OPERACIONAL.md).
 
 Para desbloquear a criação, será necessário liberar uma vaga gratuita em algum projeto da conta (somente após revisão e sua autorização), ou aprovar um plano com custo. Não reutilize o banco da pizzaria como atalho.
+
+## Revisão atômica e teste local do banco (fase 5)
+
+A migração `rede_jovem_auditoria.sql` precisa rodar em quarto lugar. Ela introduz `rj_review_report(report_id, decision)` com `SECURITY INVOKER`, que grava decisão e ocultação na mesma transação e continua submetida ao RLS. A exclusão de um post mantém a denúncia com `post_id = NULL` e sem cópia do texto. O autor que excluir o post não apaga automaticamente a linha de denúncia, mas a exclusão da conta denunciante mantém cascata por privacidade.
+
+O GitHub Actions executa verificações de esquema e políticas RLS com um PostgreSQL **descartável**, sem tocar em projetos Supabase existentes. Esse ambiente valida o SQL e as permissões; os fluxos Auth reais ainda precisam de ensaio com contas próprias em projeto dedicado.
