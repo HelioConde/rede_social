@@ -433,7 +433,7 @@ export function OnlineMVP() {
           <div className="online-filter"><label className="online-search"><Search size={17}/><input aria-label="Buscar publicações online" placeholder="Buscar publicações carregadas..." value={search} onChange={e => setSearch(e.target.value)}/></label><button aria-pressed={filter === 'recentes'} onClick={() => setFilter('recentes')} className={filter === 'recentes' ? 'active' : ''}>Recentes</button><button aria-pressed={filter === 'meus'} onClick={() => setFilter('meus')} className={filter === 'meus' ? 'active' : ''}>Minhas</button></div>
           {visiblePosts.length ? visiblePosts.map(post => {
             const owner = byId(post.author_id);
-            const related = comments.filter(c => c.post_id === post.id);
+            const related = comments.filter(c => c.post_id === post.id && !mutedIds.includes(c.author_id));
             const count = likes.filter(l => l.post_id === post.id).length;
             const liked = likes.some(l => l.post_id === post.id && l.user_id === uid);
             return <article className="online-panel online-post" data-testid="online-post" key={post.id}>
