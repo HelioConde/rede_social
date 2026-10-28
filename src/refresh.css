@@ -1,0 +1,373 @@
+/*
+ * Rede Jovem · Visual Refresh 2026
+ * Direção: editorial social, superfícies claras, tipografia expressiva
+ * Respeita preferências de movimento, alto contraste e as classes existentes.
+ * Mantém o Espaço Fé e todos os fluxos de interação.
+ */
+
+/* 1. FUNDAÇÃO */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --background:#f7f8fc;
+  --header:#ffffff;
+  --surface:#ffffff;
+  --surface-raised:#f6f6fc;
+  --surface-hover:#f2f0fb;
+  --line:#e7e8f0;
+  --text:#23243c;
+  --muted:#646b81;
+  --soft:#737b91;
+  --nav-active:#f0edff;
+  --input:#f7f7fc;
+  --secondary:#f4f3fb;
+  --danger:#b63754;
+  --focus:#6045cf;
+  --shadow:0 18px 50px rgba(40,32,94,.10);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --background:#11131d;
+  --header:#1b1e2b;
+  --surface:#1c2030;
+  --surface-raised:#252a3c;
+  --surface-hover:#31344d;
+  --line:#34394c;
+  --text:#f4f2ff;
+  --muted:#bbc0d4;
+  --soft:#a4aac2;
+  --nav-active:#393055;
+  --input:#222639;
+  --secondary:#2a2e42;
+  --danger:#ff9eac;
+  --focus:#b6a9ff;
+  --shadow:0 18px 50px rgba(0,0,0,.2);
+}
+:root{--radius-sm:12px;--radius-md:16px;--radius-lg:19px;--radius-xl:25px;--transition:160ms ease}
+html{scroll-padding-top:88px}
+body{background:var(--background);font-family:"Inter","Segoe UI",ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:-.012em}
+h1,h2,h3{letter-spacing:-.038em}
+button,input,textarea{font-family:inherit}
+.app-shell{
+  --fresh-accent:#6149c9;
+  --fresh-accent-dark:#4b34b1;
+  --fresh-accent-soft:#efecff;
+  --fresh-coral:#f96f84;
+  --fresh-mint:#d9f7e8;
+  --fresh-card-shadow:0 3px 15px rgba(36,31,82,.035),0 12px 35px rgba(36,31,82,.028);
+}
+:root[data-theme="dark"] .app-shell{
+  --fresh-accent:#baacff;
+  --fresh-accent-dark:#d3caff;
+  --fresh-accent-soft:#393252;
+  --fresh-coral:#ff9eb0;
+  --fresh-mint:#1d473d;
+  --fresh-card-shadow:0 5px 22px rgba(0,0,0,.12);
+}
+.app-shell :is(button,a,input,textarea,select):focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.app-shell button:active:not(:disabled){transform:scale(.98)}
+.app-shell .card{border:1px solid var(--line);border-radius:21px;box-shadow:var(--fresh-card-shadow)}
+.app-shell .btn{min-height:43px;border-radius:12px;padding:11px 17px;letter-spacing:-.01em;font-weight:720}
+.app-shell .btn.primary{background:#624bcc;color:#fff;box-shadow:0 6px 15px rgba(94,70,189,.16)}
+.app-shell .btn.primary:hover:not(:disabled){background:#4e37b8}
+.app-shell .btn.secondary{background:var(--surface-raised);color:var(--text)}
+.app-shell .btn.danger-btn{box-shadow:none}
+.app-shell .avatar{border:2px solid var(--surface);box-shadow:0 2px 8px rgba(33,21,93,.1);background:linear-gradient(140deg,var(--avatar-color),#6b52cb);font-weight:800}
+
+/* 2. HEADER: CLARO, FLUTUANTE E COM FOCO NA BUSCA */
+.app-shell .topbar{height:82px;padding:0 clamp(16px,2.5vw,38px);gap:24px;background:color-mix(in srgb,var(--header) 92%,transparent);border-bottom:1px solid var(--line);backdrop-filter:blur(18px);box-shadow:0 3px 18px rgba(53,43,91,.018)}
+.app-shell .brand{font-weight:840;letter-spacing:-.055em;font-size:1.3rem;gap:11px}
+.app-shell .brand strong{color:#7156d5}
+.app-shell .brand-symbol{width:44px;height:44px;border-radius:15px;background:linear-gradient(135deg,#7758dc,#ad74f7);box-shadow:0 9px 19px rgba(114,77,208,.19)}
+.app-shell .brand-symbol img{max-width:34px;max-height:34px}
+.app-shell .top-search{margin-left:clamp(18px,5vw,100px);max-width:430px;width:min(100%,430px);height:46px;border-radius:25px;background:var(--surface-raised);border:1px solid transparent;padding:0 17px;gap:11px}
+.app-shell .top-search:focus-within{background:var(--surface);border-color:#ad9bf1;outline:2px solid color-mix(in srgb,var(--fresh-accent) 20%,transparent);outline-offset:1px}
+.app-shell .top-search input{font-size:.86rem}
+.app-shell .top-actions{gap:12px}
+.app-shell .pill{color:#69647d;background:var(--surface-raised);border:1px solid var(--line);font-weight:700;font-size:.72rem;padding:8px 12px}
+:root[data-theme="dark"] .app-shell .pill{color:#c8c0de}
+.app-shell .top-actions>.icon-btn,.app-shell .notification-btn{width:43px;height:43px}
+.app-shell .icon-btn:hover{background:var(--surface-hover)}
+.app-shell .top-user{background:var(--surface-raised);border:1px solid var(--line);border-radius:26px;padding:6px 11px 6px 6px;gap:8px}
+.app-shell .top-user:hover{background:var(--surface-hover)}
+.app-shell .top-user .avatar{height:32px;width:32px;font-size:.7rem}
+.app-shell .top-theme{border:1px solid var(--line);background:var(--surface);border-radius:50%}
+.app-shell .count,.app-shell .nav-count{background:#f16f8a}
+
+/* 3. GRID E NAVEGAÇÃO */
+.app-shell .layout{max-width:1570px;grid-template-columns:252px minmax(0,1fr) 276px;gap:0;min-height:calc(100vh - 82px)}
+.app-shell .sidebar{position:sticky;top:82px;height:calc(100vh - 82px);min-height:calc(100vh - 82px);align-self:start;border-right:0;padding:34px 18px 24px 22px;overflow-y:auto;scrollbar-width:thin}
+.app-shell .sidebar-profile{border:0;background:var(--surface);border-radius:19px;padding:16px 13px;margin:0 0 21px;box-shadow:var(--fresh-card-shadow);gap:12px}
+.app-shell .sidebar-profile strong{font-size:.9rem;font-weight:800}
+.app-shell .sidebar-profile>div>span{font-size:.76rem;color:var(--muted)}
+.app-shell .sidebar-profile .avatar{height:47px;width:47px}
+.app-shell .side-links{gap:5px}
+.app-shell .side-link{position:relative;border:1px solid transparent;color:var(--muted);font-size:.88rem;font-weight:670;padding:12px 14px;border-radius:13px;text-decoration:none;min-height:47px;gap:13px}
+.app-shell .side-link svg{flex-shrink:0}
+.app-shell .side-link:hover{background:var(--surface-hover);color:var(--text)}
+.app-shell .side-link.active{background:var(--nav-active);border-color:color-mix(in srgb,var(--fresh-accent) 11%,transparent);color:var(--fresh-accent);font-weight:790}
+.app-shell .side-link.active::before{content:"";position:absolute;left:0;top:11px;bottom:11px;width:3px;border-radius:0 4px 4px 0;background:var(--fresh-accent)}
+.app-shell .side-hint{background:linear-gradient(140deg,#f2efff,#faf4fd);border:1px solid #e8dff8;color:#7057c4;border-radius:19px;padding:17px 14px;margin-bottom:12px}
+.app-shell .side-hint strong{color:#302753;font-size:.79rem}
+.app-shell .side-hint p{color:#645b7a;font-size:.72rem;line-height:1.6}
+:root[data-theme="dark"] .app-shell .side-hint{background:linear-gradient(140deg,#2b2943,#29253b);border-color:#453b60}
+:root[data-theme="dark"] .app-shell .side-hint strong{color:#f0eaff}
+:root[data-theme="dark"] .app-shell .side-hint p{color:#c5bdda}
+.app-shell .sidebar-footer{font-size:.68rem;color:var(--soft)}
+.app-shell .content{max-width:850px;padding:33px clamp(16px,2.25vw,34px) 90px}
+
+/* 4. BOAS-VINDAS: TIPOGRAFIA COMO ELEMENTO PRINCIPAL */
+.app-shell .feed-welcome{
+  position:relative;isolation:isolate;min-height:207px;overflow:hidden;display:flex;align-items:center;
+  margin-bottom:16px;padding:29px 33px;background:#f6edff;
+  border:1px solid #ecdef8;border-radius:27px;
+  background-image:radial-gradient(ellipse at 100% 2%,rgba(255,186,195,.66),transparent 43%),linear-gradient(111deg,#f4eaff,#fbf1ff 58%,#ffebdf);
+}
+.app-shell .feed-welcome::after{content:"";position:absolute;width:210px;height:210px;border:1.5px solid rgba(131,99,200,.19);border-radius:50%;right:-27px;top:-97px;pointer-events:none}
+.app-shell .welcome-copy{position:relative;z-index:1;max-width:610px}
+.app-shell .feed-welcome .eyebrow{color:#6850b5;font-size:.69rem;letter-spacing:.16em;font-weight:850}
+.app-shell .feed-welcome h1{font-size:clamp(1.75rem,2.5vw,2.65rem);color:#292344;letter-spacing:-.057em;font-weight:860;line-height:1.12;margin:13px 0 10px}
+.app-shell .feed-welcome h1 .welcome-name{color:#6348c0}
+.app-shell .feed-welcome h1 .welcome-sparkle{color:#f08087;font-size:.85em;display:inline-block}
+.app-shell .feed-welcome p{font-size:.87rem;color:#605774;line-height:1.55;max-width:475px}
+.app-shell .welcome-caption{display:inline-flex;align-items:center;gap:7px;color:#756381;background:rgba(255,255,255,.58);border:1px solid rgba(255,255,255,.95);padding:7px 10px;border-radius:20px;font-size:.68rem;font-weight:750;margin-top:16px}
+.app-shell .welcome-pulse{width:7px;height:7px;background:#7f67c9;border-radius:50%}
+.app-shell .welcome-decoration{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.app-shell .welcome-orbit{position:absolute;display:grid;place-items:center}
+.app-shell .orbit-a{right:54px;top:20px;font-size:110px;line-height:1;color:#fd9ba1;opacity:.8;transform:rotate(-17deg)}
+.app-shell .orbit-b{right:15px;bottom:-48px;font-size:125px;color:#c8a7ff;opacity:.5}
+.app-shell .orbit-c{right:185px;bottom:8px;font-size:38px;color:#8f71d3;opacity:.6}
+:root[data-theme="dark"] .app-shell .feed-welcome{background-image:radial-gradient(ellipse at 100% 0%,rgba(150,78,117,.3),transparent 48%),linear-gradient(110deg,#302b4c,#34314d 60%,#472e46);border-color:#51425f}
+:root[data-theme="dark"] .app-shell .feed-welcome h1{color:#faf3ff}
+:root[data-theme="dark"] .app-shell .feed-welcome .welcome-name{color:#d8c5ff}
+:root[data-theme="dark"] .app-shell .feed-welcome .eyebrow{color:#d4bfff}
+:root[data-theme="dark"] .app-shell .feed-welcome p{color:#d0c4db}
+:root[data-theme="dark"] .app-shell .welcome-caption{background:#504766;border-color:#625777;color:#fff}
+
+/* 5. ACESSOS RÁPIDOS: MENOS BLOCOS GRANDES */
+.app-shell .feed-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 17px}
+.app-shell .feed-quick-actions>.card{min-width:0;min-height:129px;margin:0;border-radius:18px;box-shadow:none;display:flex;gap:12px;align-items:flex-start;padding:16px}
+.app-shell .feed-quick-actions .online-invite{background:#eff7ff!important;border:1px solid #e0ebff!important}
+.app-shell .feed-quick-actions .faith-quick{background:#fff6ef;border:1px solid #f5e8dd}
+.app-shell .feed-quick-actions .quick-icon,.app-shell .feed-quick-actions .faith-quick-icon{flex:none;width:37px;height:37px;border-radius:12px;display:grid;place-items:center;background:#dce8ff;color:#3865a1}
+.app-shell .feed-quick-actions .faith-quick-icon{background:#ffe8d6;color:#bd704c}
+.app-shell .feed-quick-actions strong{font-size:.78rem;font-weight:830;color:#273551;line-height:1.3;display:block;margin:1px 0 5px}
+.app-shell .feed-quick-actions p{font-size:.72rem;line-height:1.4;color:#596478;margin:0 0 6px;max-width:250px}
+.app-shell .feed-quick-actions :is(a,button){font-size:.72rem;font-weight:800;color:#4266b3;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:0;border:none;background:transparent;margin:1px 0 0;white-space:normal;text-align:left}
+.app-shell .feed-quick-actions .faith-quick button{color:#a15f42}
+.app-shell .feed-quick-actions :is(a,button):hover{text-decoration:underline;background:transparent}
+:root[data-theme="dark"] .app-shell .feed-quick-actions .online-invite{background:#222b43!important;border-color:#3d4b6e!important}
+:root[data-theme="dark"] .app-shell .feed-quick-actions .faith-quick{background:#3c302c;border-color:#554538}
+:root[data-theme="dark"] .app-shell .feed-quick-actions strong{color:#f3f0ff}
+:root[data-theme="dark"] .app-shell .feed-quick-actions p{color:#c6bdc9}
+:root[data-theme="dark"] .app-shell .feed-quick-actions :is(a,button){color:#c5bbff}
+
+/* 6. EDITOR E FEED */
+.app-shell .composer{padding:20px 21px 16px;border-radius:23px}
+.app-shell .composer-head{gap:13px}
+.app-shell .composer-head .avatar{width:46px;height:46px}
+.app-shell .composer textarea{background:var(--surface-raised);border:1px solid transparent;border-radius:17px;min-height:83px;padding:17px 18px;font-size:.88rem;color:var(--text);resize:vertical}
+.app-shell .composer textarea:focus{outline:2px solid #b1a1fa;border-color:transparent;background:var(--surface)}
+.app-shell .composer-bottom{margin-top:13px;padding-top:12px;border-color:var(--line)}
+.app-shell .upload-label{color:var(--fresh-accent);font-weight:750;border-radius:12px;padding:9px 10px}
+.app-shell .compose-counter{font-size:.72rem}
+.app-shell .feed-header{margin:27px 1px 17px}
+.app-shell .feed-header h2{font-size:1.22rem;font-weight:840;letter-spacing:-.04em}
+.app-shell .feed-header h2 span{font-size:.72rem;color:var(--muted);font-weight:650;margin-left:8px;letter-spacing:0}
+.app-shell .segmented{background:var(--surface-raised);border:0;border-radius:24px;padding:4px;gap:2px}
+.app-shell .segmented button{border-radius:21px;padding:9px 16px;font-weight:750;min-height:36px}
+.app-shell .segmented button.selected{background:var(--surface);color:var(--fresh-accent);box-shadow:0 2px 8px rgba(30,21,80,.07)}
+.app-shell .feed-list{gap:15px}
+.app-shell .post-card{padding:21px 22px 15px;border-radius:23px}
+.app-shell .post-author strong{font-size:.92rem;font-weight:830}
+.app-shell .post-author span{font-size:.77rem;color:var(--muted)}
+.app-shell .post-text{font-size:.9rem;line-height:1.75;padding:17px 2px 21px}
+.app-shell .post-actions{border-color:var(--line);padding:7px 2px;justify-content:flex-start;gap:clamp(6px,2vw,25px)}
+.app-shell .post-action{font-size:.79rem;color:var(--muted);font-weight:670;border-radius:12px;min-height:39px;padding:9px 10px}
+.app-shell .post-action.is-liked{color:#d75172;background:#fff1f4}
+:root[data-theme="dark"] .app-shell .post-action.is-liked{color:#ffa8ba;background:#4d3041}
+.app-shell .post-action:not(.static):hover{background:var(--surface-hover)}
+.app-shell .comment-form{margin-top:13px}
+.app-shell .comment-form input{min-height:42px;padding:10px 15px;background:var(--surface-raised);border:1px solid transparent;font-size:.8rem}
+.app-shell .comment-form input:focus{border-color:#9886e3;outline:1px solid #9886e3}
+.app-shell .comment>div:last-child{background:var(--surface-raised);padding:10px 14px;border-radius:16px}
+.app-shell .send-icon{color:var(--fresh-accent)}
+.app-shell .empty{border-style:dashed}
+.app-shell :is(.section-heading,.page-intro:not(.feed-welcome)) h1{letter-spacing:-.045em}
+.app-shell .page-intro:not(.feed-welcome){padding:10px 0 5px}
+.app-shell .page-intro:not(.feed-welcome) h1{font-size:clamp(1.7rem,3vw,2.25rem)}
+.app-shell .eyebrow{color:var(--fresh-accent);font-size:.7rem}
+.app-shell .date-pill{border-radius:18px}
+.app-shell .person-card,.app-shell .settings-card,.app-shell .profile-card{overflow:hidden}
+
+/* 7. CONTATOS: PAINEL SECUNDÁRIO, SEM PARECER DASHBOARD */
+.app-shell .rightbar{top:82px;padding:34px 22px 24px 4px;border:0;align-self:start;position:sticky}
+.app-shell .welcome-art{position:relative;isolation:isolate;overflow:hidden;gap:10px;min-height:228px;padding:24px 21px;border-radius:24px;background:linear-gradient(148deg,#7156ce 0%,#8c6de1 57%,#bd8bdd 100%);box-shadow:0 14px 30px rgba(110,80,190,.16)}
+.app-shell .welcome-art .right-feature-overline{display:flex;align-items:center;gap:7px;color:#f4e8ff;font-size:.7rem;font-weight:850;letter-spacing:.15em;position:relative;z-index:1}
+.app-shell .welcome-art strong{font-size:1.58rem;line-height:1.16;letter-spacing:-.05em;max-width:235px;position:relative;z-index:1;margin-top:7px}
+.app-shell .welcome-art strong em{font-style:normal;color:#ffe2bb}
+.app-shell .welcome-art>span:not(.right-feature-overline,.right-feature-decoration){color:#f6edff;line-height:1.5;font-size:.8rem;max-width:195px;position:relative;z-index:1}
+.app-shell .welcome-art button{margin-top:auto;border-radius:22px;background:#fff;color:#5d44b7;min-height:40px;font-size:.78rem;font-weight:830;padding:10px 15px;position:relative;z-index:1}
+.app-shell .welcome-art button:hover{background:#f2eaff;color:#4a37a1}
+.app-shell .welcome-art .right-feature-decoration{position:absolute;right:-14px;bottom:12px;opacity:.22;font-size:125px;color:white;line-height:1}
+.app-shell .contacts-header{margin:26px 0 10px;padding:0 9px}
+.app-shell .contacts-header h2{font-size:1rem;font-weight:830}
+.app-shell .contacts-header span{background:var(--fresh-accent-soft);color:var(--fresh-accent);border-radius:13px;padding:2px 9px;font-weight:750}
+.app-shell .contacts{background:var(--surface);border:1px solid var(--line);border-radius:19px;padding:6px 12px;box-shadow:var(--fresh-card-shadow)}
+.app-shell .contact-mini{border-radius:12px;padding:12px 9px;gap:11px;font-weight:650}
+.app-shell .contact-mini:hover{background:var(--surface-hover)}
+.app-shell .right-note{margin:17px 7px 0;line-height:1.5}
+
+/* 8. JANELAS DE CHAT, PERFIL E DEMAIS SEÇÕES */
+.app-shell .chat-window{border:1px solid var(--line);border-radius:20px 20px 0 0;box-shadow:0 16px 48px rgba(38,28,78,.22)}
+.app-shell .chat-header{background:var(--surface);color:var(--text)}
+.app-shell .bubble.own{background:#6750ce;color:white}
+.app-shell .chat-compose input{background:var(--surface-raised)}
+.app-shell .profile-card .cover-photo{border-radius:21px 21px 0 0}
+.app-shell .profile-card .profile-details{background:var(--surface)}
+.app-shell .form-grid :is(input,textarea){background:var(--surface-raised)}
+.app-shell .toast{border:1px solid var(--line);box-shadow:var(--shadow);border-radius:16px}
+
+/* 9. TABLET / MOBILE: PRESERVA A NAVEGAÇÃO E NÃO OCULTA AÇÕES */
+@media(max-width:1350px){
+  .app-shell .layout{grid-template-columns:238px minmax(0,1fr) 258px}
+  .app-shell .sidebar{padding-left:16px;padding-right:11px}
+  .app-shell .rightbar{padding-right:12px}
+  .app-shell .content{padding-left:18px;padding-right:18px}
+}
+@media(max-width:1190px){
+  .app-shell .layout{grid-template-columns:236px minmax(0,1fr)}
+  .app-shell .rightbar{display:none}
+  .app-shell .top-search{margin-left:clamp(8px,3vw,35px)}
+}
+@media(max-width:850px){
+  .app-shell .layout{grid-template-columns:76px minmax(0,1fr)}
+  .app-shell .sidebar{padding:22px 10px}
+  .app-shell .sidebar-profile,.app-shell .side-bottom{display:none}
+  .app-shell .side-link{justify-content:center;min-height:52px;padding:13px}
+  .app-shell .side-link span{display:none}
+  .app-shell .side-link.active::before{top:9px;bottom:9px}
+  .app-shell .topbar{gap:13px;padding:0 16px}
+  .app-shell .top-search{margin:0;max-width:none}
+  .app-shell .pill{display:none}
+  .app-shell .content{max-width:800px;padding:25px 18px 80px}
+}
+@media(max-width:680px){
+  .app-shell .feed-quick-actions{grid-template-columns:1fr}
+  .app-shell .feed-quick-actions>.card{min-height:0;padding:13px 15px}
+  .app-shell .feed-welcome{padding:23px 24px;min-height:196px}
+}
+@media(max-width:600px){
+  .app-shell .topbar{height:65px;padding:0 13px;gap:10px}
+  .app-shell .brand{font-size:1.1rem;gap:8px}
+  .app-shell .brand-symbol{width:35px;height:35px;border-radius:12px}
+  .app-shell .top-search{width:37px;height:40px;min-width:0;padding:0 7px;border:0;background:transparent}
+  .app-shell .top-search:focus-within{min-width:105px;width:auto;background:var(--input)}
+  .app-shell .top-search.expanded{flex:1;background:var(--surface-raised);border:1px solid var(--line);border-radius:23px}
+  .app-shell .top-actions{gap:2px}
+  .app-shell .top-user{padding:3px;background:transparent;border:0}
+  .app-shell .top-user>span:not(.avatar),.app-shell .top-user>svg,.app-shell .top-theme{display:none}
+  .app-shell .hamburger{display:inline-grid}
+  .app-shell .layout{display:block;min-height:calc(100vh - 65px)}
+  .app-shell .sidebar{position:fixed;z-index:60;top:65px;bottom:0;width:min(300px,85vw);height:calc(100vh - 65px);min-height:0;padding:22px 17px;display:flex;background:var(--header);box-shadow:var(--shadow);border-right:1px solid var(--line);transform:translateX(-105%)}
+  .app-shell .sidebar.open{transform:translateX(0)}
+  .app-shell .sidebar-profile{display:flex}
+  .app-shell .side-bottom{display:block}
+  .app-shell .side-link{justify-content:flex-start;padding:13px 15px}
+  .app-shell .side-link span{display:block}
+  .app-shell .mobile-overlay{inset:65px 0 0}
+  .app-shell .content{padding:16px 13px 104px}
+  .app-shell .feed-welcome{min-height:190px;margin-bottom:13px;padding:21px 20px;border-radius:22px}
+  .app-shell .feed-welcome h1{font-size:clamp(1.75rem,7.1vw,2.2rem);margin:12px 0}
+  .app-shell .feed-welcome p{font-size:.8rem;max-width:290px;line-height:1.5}
+  .app-shell .feed-welcome .eyebrow{font-size:.62rem}
+  .app-shell .welcome-caption{font-size:.65rem;margin-top:13px}
+  .app-shell .orbit-a{right:-25px;top:20px;font-size:95px;opacity:.33}
+  .app-shell .orbit-b{right:-31px;bottom:-40px;font-size:90px}
+  .app-shell .orbit-c{right:80px;bottom:24px;font-size:25px;opacity:.3}
+  .app-shell .feed-quick-actions{gap:9px;margin-bottom:12px}
+  .app-shell .feed-quick-actions>.card{border-radius:16px}
+  .app-shell .composer{padding:15px;border-radius:20px}
+  .app-shell .composer-head{gap:9px}
+  .app-shell .composer textarea{padding:12px 13px;font-size:.82rem;min-height:72px}
+  .app-shell .composer-bottom{gap:8px;padding-top:8px;margin-top:10px}
+  .app-shell .feed-header{margin:21px 0 12px}
+  .app-shell .feed-header h2{font-size:1.08rem}
+  .app-shell .feed-header h2 span{font-size:.66rem}
+  .app-shell .segmented button{padding:7px 10px;font-size:.74rem}
+  .app-shell .post-card{border-radius:19px;padding:16px 15px 13px}
+  .app-shell .post-text{font-size:.85rem}
+  .app-shell .post-action{padding:8px 6px}
+  .app-shell .bottom-nav{background:color-mix(in srgb,var(--header) 95%,transparent);backdrop-filter:blur(16px);padding:7px 4px max(7px,env(safe-area-inset-bottom));border-top:1px solid var(--line);box-shadow:0 -6px 28px rgba(43,34,74,.06)}
+  .app-shell .bottom-nav button{min-width:53px;gap:3px;min-height:51px;border-radius:12px}
+  .app-shell .bottom-nav button.active{color:var(--fresh-accent);background:var(--fresh-accent-soft);font-weight:820}
+  .app-shell .bottom-nav small{font-size:.61rem}
+}
+@media(max-width:370px){
+  .app-shell .feed-welcome{padding:19px 17px}
+  .app-shell .composer-bottom .compose-counter{display:none}
+  .app-shell .feed-header h2 span{display:block;margin:3px 0 0}
+}
+
+/* 10. VERSÃO ONLINE: MESMA IDENTIDADE, MESMA CLAREZA */
+.online-root{
+  --on-text:#29243e;--on-muted:#6d6881;--on-surface:#fff;--on-border:#e9e4f1;--on-accent:#6953d0;
+  background:#f8f7fc;color:var(--on-text);min-height:100vh;
+}
+.online-root .online-top{background:rgba(255,255,255,.96);border-color:var(--on-border);position:sticky;top:0;backdrop-filter:blur(16px)}
+.online-root .online-logo{color:#302646}
+.online-root .online-logo strong{color:#7054cf}
+.online-root .online-logo-mark{background:linear-gradient(135deg,#7957d9,#aa83ef)}
+.online-root .online-top-inner{min-height:76px}
+.online-root .online-live{color:#5d5871}
+.online-root .online-live span{background:#279f7d}
+.online-root .online-ghost,.online-root .online-icon{color:#4c425e;background:white;border-color:#e4dded;border-radius:23px}
+.online-root .online-ghost:hover,.online-root .online-icon:hover{background:#f4efff}
+.online-root .online-main{max-width:1210px}
+.online-root .online-hero{
+  min-height:245px;border:1px solid #ecdcf7;border-radius:26px;
+  background:radial-gradient(circle at 90% 30%,rgba(251,169,176,.66),transparent 36%),linear-gradient(116deg,#eee7ff,#f8efff 55%,#fff0e0);
+}
+.online-root .online-hero h1{color:#34244f}
+.online-root .online-hero h1 em{color:#7050c6}
+.online-root .online-hero p{color:#665976}
+.online-root .online-hero .online-kicker{color:#6b4fb1}
+.online-root .online-hero-facts{color:#614e74}
+.online-root .online-hero-decoration{color:#a179df;opacity:.46}
+.online-root .online-panel{border-color:var(--on-border);box-shadow:0 6px 28px rgba(48,34,93,.04);border-radius:22px}
+.online-root .online-panel h2,.online-root .online-panel h3{color:#332a49}
+.online-root .online-primary{background:#664acc;border-radius:24px;box-shadow:0 7px 16px rgba(95,66,172,.15)}
+.online-root .online-primary:hover{background:#5539b4;filter:none}
+.online-root .online-kicker{color:#7253c5}
+.online-root .online-avatar{background:linear-gradient(135deg,#eadcff,#b6d5ff);color:#52379b}
+.online-root .online-identity p{color:#605a6b}
+.online-root .online-rules>svg{color:#6a54c0}
+.online-root .online-small,.online-root .online-compose-header span,.online-root .online-post-person span,.online-root .online-compose-foot small{color:#706b80}
+.online-root .online-compose textarea,.online-root .online-comment-form input,.online-root .online-form input,.online-root .online-form textarea{background:#f7f6fc;color:#29243e;border:1px solid #e9e4f1;border-radius:15px}
+.online-root :is(input,textarea)::placeholder{color:#7e7991}
+.online-root .online-search{background:white;border-color:#e9e4f1;border-radius:22px}
+.online-root .online-search input{color:#29243e}
+.online-root .online-filter>button{border-color:#e6def0;background:white;color:#665b77;border-radius:22px}
+.online-root .online-filter>button.active{color:#fff;background:#664acc;border-color:#664acc}
+.online-root .online-post-body{color:#373148}
+.online-root .online-post-actions{color:#686477;border-color:#e8e1f0}
+.online-root .online-post-actions button.liked{color:#cf426b}
+.online-root .online-comment>div:last-child{background:#f7f5fc}
+.online-root .online-comment p{color:#504b60}
+.online-root .online-comment-form button{background:#664acc;border-radius:14px}
+.online-root .online-setup .online-small,.online-root .online-auth-intro p,.online-root .online-onboard>p,.online-root .online-setup>p{color:#666075}
+.online-root .online-footer{border-color:#ebe5f1;color:#706983}
+.online-root .online-footer a,.online-root .online-switch{color:#6045ba}
+.online-root .online-empty h3{color:#302845}
+.online-root .online-feedback.error{background:#852b3c;color:#fff}
+@media(max-width:560px){
+  .online-root .online-hero{border-radius:20px}
+}
+
+/* 11. ACESSIBILIDADE */
+@media(prefers-reduced-motion:reduce){
+  .app-shell *, .online-root *, .app-shell *::before,.app-shell *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+@media(forced-colors:active){
+  .app-shell .card,.app-shell .feed-welcome,.app-shell .feed-quick-actions>.card{border:1px solid CanvasText}
+  .app-shell .side-link.active{outline:2px solid Highlight;outline-offset:-2px}
+}
