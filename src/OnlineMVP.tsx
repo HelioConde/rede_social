@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft, Heart, MessageCircle, Send, UserRound, RefreshCw,
+  ArrowLeft, Heart, MessageCircle, Send, RefreshCw,
   ShieldCheck, LogOut, Trash2, Flag, Sparkles, Pencil, Check,
   Users, Search, LockKeyhole
 } from 'lucide-react';
