@@ -14,6 +14,8 @@ const api = endpoint && /^https:\/\/[a-z0-9.-]+$/i.test(endpoint) && publishable
   ? createClient(endpoint, publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
   : null;
 
+export const onlineConfigured = Boolean(api);
+
 type Person = { id: string; handle: string; name: string; bio: string; created_at: string };
 type Entry = { id: string; author_id: string; content: string; created_at: string };
 type Like = { post_id: string; user_id: string };
