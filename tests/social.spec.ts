@@ -37,7 +37,7 @@ test('editar perfil, alternar tema e restaurar demonstração',async ({page})=>{
   await expect(page.getByRole('heading',{name:'Perfil QA'})).toBeVisible();
   await page.goto('/rede_social/#settings');
   await page.getByRole('button',{name:'Alternar tema'}).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   page.once('dialog',d=>d.accept());
   await page.getByRole('button',{name:'Restaurar demonstração'}).click();
   await expect(page.getByRole('heading',{name:/Boas-vindas, Visitante/})).toBeVisible();
@@ -46,7 +46,7 @@ test('busca filtra publicações e botões têm nomes acessíveis', async ({page
   await page.getByRole('textbox',{name:'Pesquisar pessoas e publicações'}).fill('criatividade conecta');
   await expect(page.getByTestId('post-card')).toHaveCount(1);
   await expect(page.getByRole('button',{name:'Notificações'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'Ativar modo claro'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Ativar modo escuro'})).toBeVisible();
 });
 
 test('busca mobile expande por botão acessível',async ({page})=>{

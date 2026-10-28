@@ -53,3 +53,9 @@ Veja `docs/RESEARCH_RELIGIOUS_DIGITAL_2026.md` para as fontes do YouVersion, Pew
 A rota [**#comunidade**](https://helioconde.github.io/rede_social/#comunidade) já está implementada com autenticação, feed compartilhado, curtidas, comentários, perfil e denúncias via Supabase. **O ambiente online só será ativado quando um projeto Supabase exclusivo da Rede Jovem for configurado.** Enquanto isso, continua disponível a demonstração local.
 
 Leia [docs/MVP_ONLINE.md](docs/MVP_ONLINE.md) para SQL, variáveis públicas, RLS, configuração do e-mail e checklist de segurança. O script está em [supabase/rede_jovem_mvp.sql](supabase/rede_jovem_mvp.sql). Não reutilize o projeto de banco de outro aplicativo.
+
+### Atualização visual de outubro de 2026
+
+A Rede Jovem ganhou linguagem visual clara e expressiva: feed como foco, hero editorial, cartões compactos, navegação lateral simplificada, acentos violeta/coral, responsividade e suporte a modo escuro. A preferência visual passou a usar a chave `rede-jovem-theme-v3` para iniciar a nova experiência com o tema claro (sem alterar os dados do feed).
+
+A inspiração e os tokens estão em `docs/VISUAL_REFRESH_2026.md`; os overrides de design estão isolados em `src/refresh.css`. Os testes Playwright verificam as duas aparências e as larguras mobile/desktop.
