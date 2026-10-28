@@ -10,7 +10,7 @@ import type { SocialData, Profile, Post, Section, FriendStatus } from './types';
 import { starterData } from './data';
 import { downloadBackup, imageToDataUrl, isValidState, loadState, newId, saveState } from './storage';
 import './styles.css';
-import { OnlineMVP } from './OnlineMVP';
+import { OnlineMVP, onlineConfigured } from './OnlineMVP';
 import { FaithHub } from './FaithHub';
 import { faithPalettes, type FaithPalette } from './faith-content';
 
@@ -271,6 +271,7 @@ function App(){
         {savingError&&<div role="alert" className="storage-warning">Não foi possível salvar seus dados. Exporte um backup antes de sair.</div>}
         {section==='feed'&&<>
           <div className="page-intro"><div><span className="eyebrow"><Sparkles size={14}/> SEU ESPAÇO SOCIAL</span><h1>Boas-vindas, {me.name.split(' ')[0]}! <span>✦</span></h1><p>Compartilhe ideias e acompanhe sua comunidade.</p></div><div className="date-pill"><LayoutGrid size={16}/> Feed da comunidade</div></div>
+          <div className="online-invite card"><div><strong>Mais do que uma demonstração</strong><p>Estamos criando a comunidade com pessoas reais. Veja o MVP online e acompanhe a evolução.</p></div><a href="#comunidade">Conhecer a comunidade <span aria-hidden="true">→</span></a></div>
           <div className="faith-quick card"><span className="faith-quick-icon"><BookOpen size={21}/></span><div><strong>Um momento para renovar as esperanças</strong><p>Um espaço opcional com reflexões bíblicas, gratidão e mensagens de paz.</p></div><button type="button" onClick={()=>go('faith')}>Conhecer Espaço Fé <span aria-hidden="true">→</span></button></div>
           <section className="card composer" aria-label="Criar publicação"><div className="composer-head"><Avatar profile={me}/><textarea aria-label="O que você está pensando?" placeholder={'No que você está pensando, '+me.name.split(' ')[0]+'?'} maxLength={2000} value={postBody} onChange={e=>setPostBody(e.target.value)} rows={2}/></div>
             {postImage&&<div className="attachment"><img alt="Prévia da imagem selecionada" src={postImage}/><button className="icon-btn" aria-label="Remover imagem" onClick={()=>setPostImage('')}><X size={18}/></button></div>}
@@ -306,9 +307,9 @@ function App(){
   </div>;
 }
 function RootApp() {
-  const [online,setOnline]=useState(() => location.hash === '#comunidade');
+  const [online,setOnline]=useState(() => location.hash === '#comunidade' || (onlineConfigured && !location.hash));
   useEffect(() => {
-    const change = () => setOnline(location.hash === '#comunidade');
+    const change = () => setOnline(location.hash === '#comunidade' || (onlineConfigured && !location.hash));
     addEventListener('hashchange',change);
     return () => removeEventListener('hashchange',change);
   },[]);
