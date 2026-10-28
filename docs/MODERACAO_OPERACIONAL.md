@@ -13,6 +13,7 @@ O MVP local não tem denúncias online reais. A área administrativa só aparece
    - `rede_jovem_mvp.sql`: perfis, posts, comentários, curtidas, denúncias e RLS básico.
    - `rede_jovem_controles_pessoais.sql`: silenciar usuários e permissões por coluna.
    - `rede_jovem_moderacao.sql`: moderadores, fila de revisão e ocultação com RLS.
+   - `rede_jovem_auditoria.sql`: revisão atômica com `SECURITY INVOKER` e preservação mínima de denúncias.
 3. Crie uma conta real com e-mail verificado, complete o perfil e localize o UUID dela no **novo** Supabase.
 4. Nomeie o primeiro moderador exclusivamente no SQL Editor da conta administrativa:
    `insert into public.rj_moderators(user_id) values ('UUID_DA_CONTA_VERIFICADA');`
@@ -26,8 +27,8 @@ O MVP local não tem denúncias online reais. A área administrativa só aparece
 - **Ocultar publicação** insere uma linha em `rj_post_moderation`; a publicação desaparece das consultas normais a posts, curtidas e comentários. Moderadores e o próprio autor mantêm acesso ao post para revisão. O frontend não pode conceder essa permissão.
 - **Descartar denúncia** insere uma linha imutável em `rj_report_reviews`; ocultar também registra a decisão separadamente.
 - Moderadores não podem nomear outros moderadores, conceder permissões via frontend ou excluir/modificar o histórico de decisões.
-- A operação de ocultar e registrar a decisão ocorre em duas chamadas; se a segunda falhar, o post pode ficar oculto sem decisão registrada. A interface permite atualizar a fila e finalizar a revisão. Para escala, migrar para operação transacional no backend.
-- A tabela `rj_reports` tem chave estrangeira com `ON DELETE CASCADE` para o post. Caso o próprio autor exclua a publicação, a denúncia e seu registro de revisão serão removidos. **Este é um limite de retenção de evidências e não equivale a um registro auditável permanente.** Não use essa fila como sistema de conformidade/legal sem implementar retenção própria.
+- Após aplicar `rede_jovem_auditoria.sql`, o painel chama a função `rj_review_report` com `SECURITY INVOKER`. Ocultação e registro da decisão passam a ocorrer na mesma transação do PostgreSQL: uma falha desfaz toda a operação. As políticas RLS continuam sendo aplicadas.
+- Após aplicar `rede_jovem_auditoria.sql`, excluir uma publicação define `rj_reports.post_id = NULL`, preservando data, motivo e denunciante e também o registro de decisão. **O texto do post não é copiado ou armazenado para evidência**; a revisão posterior só poderá registrar descarte por indisponibilidade. A exclusão da conta do denunciante remove as denúncias por cascata. Esse histórico limitado não substitui gestão de evidências, retenção com prazo definido nem política LGPD.
 
 ## Testes de segurança antes do lançamento
 
@@ -38,14 +39,14 @@ Use **três contas reais de teste** no novo banco: participante A, participante 
 3. A e B não devem conseguir consultar as revisões nem inserir registros em `rj_post_moderation`.
 4. Tente simular, via chave pública, um INSERT em `rj_moderators` com usuário comum — deve ser negado.
 5. M revisa outra denúncia como descartada; confirme que o registro permanece disponível na fila.
-6. Verifique que M não pode atualizar/excluir decisões gravadas e que A não pode editar o autor de posts.
+6. Verifique que M não pode atualizar/excluir decisões gravadas e que A não pode editar o autor de posts. Exclua um post denunciado como autor e confirme que a denúncia permanece com `post_id` nulo, sem texto, e que a decisão anterior permanece.
 7. Inspecione o **Security Advisor**, permissões por coluna e logs, inclusive após excluir uma publicação denunciada. Documente as limitações de retenção e o fluxo de contestação.
 8. Teste mobile e faça revisão manual antes de abrir o cadastro para público.
 
 ## Próximas etapas necessárias para lançamento
 
-- Retenção de denúncias independente da exclusão de posts, com prazo de guarda e tratamento LGPD.
+- Definir prazo de guarda, descarte programado e procedimento LGPD para denúncias, que agora permanecem com dados mínimos após a exclusão de posts.
 - Revisão paginada de **pendências**, não apenas das últimas 50 denúncias.
-- Operações transacionais de ocultar/revisar, fluxo de recurso/reversão e histórico auditável.
+- Fluxo de recurso/reversão e política de histórico auditável (a operação de ocultar/revisar agora é atômica).
 - Limites de escrita, detecção de spam, bloqueio entre contas, política de privacidade e exclusão de dados pessoais.
 - Testes de integração em um projeto próprio (os Playwright atuais exercitam o modo sem backend e contratos estáticos do SQL).
