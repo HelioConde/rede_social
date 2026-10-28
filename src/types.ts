@@ -5,5 +5,5 @@ export type Post = { id: ID; authorId: ID; body: string; image?: string; created
 export type FriendStatus = { userId: ID; status: 'friends' | 'pending' | 'suggested' | 'sent' };
 export type Message = { id: ID; from: ID; to: ID; body: string; createdAt: number };
 export type GratitudeNote = { id: ID; body: string; createdAt: number };
-export type SocialData = { version: number; activeId: ID; profiles: Profile[]; posts: Post[]; friendships: FriendStatus[]; messages: Message[]; faithFavorites?: string[]; gratitudeNotes?: GratitudeNote[]; readingProgress?: Record<string,string[]> };
+export type SocialData = { version: number; activeId: ID; profiles: Profile[]; posts: Post[]; friendships: FriendStatus[]; messages: Message[]; faithFavorites?: string[]; gratitudeNotes?: GratitudeNote[]; readingProgress?: Record<string,string[]>; savedPostIds?: Record<ID,ID[]> };
 export type Section = 'feed' | 'faith' | 'profile' | 'friends' | 'messages' | 'explore' | 'settings';
