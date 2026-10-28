@@ -51,9 +51,53 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist/
+  db-rls:
+    name: Testes reais de RLS (PostgreSQL descartável)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test-only
+          POSTGRES_DB: rede_jovem_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rede_jovem_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar cliente PostgreSQL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+      - name: Validar migrações, isolamento e decisões de moderação
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: rede_jovem_test
+          PGUSER: postgres
+          PGPASSWORD: test-only
+        run: |
+          set -euo pipefail
+          for file in \
+            supabase/tests/pg_bootstrap.sql \
+            supabase/rede_jovem_mvp.sql \
+            supabase/rede_jovem_controles_pessoais.sql \
+            supabase/rede_jovem_moderacao.sql \
+            supabase/rede_jovem_auditoria.sql \
+            supabase/tests/rls_smoke.sql
+          do
+            echo "Verificando $file"
+            psql -X -v ON_ERROR_STOP=1 -f "$file"
+          done
+
   deploy:
     if: github.ref == 'refs/heads/gh-pages' && github.event_name == 'push'
-    needs: qa
+    needs: [qa, db-rls]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
