@@ -16,6 +16,7 @@ import { faithPalettes, type FaithPalette } from './faith-content';
 import './refresh.css';
 import './personalization.css';
 import './feed-experience.css';
+import './online-experience.css';
 
 const BASE=import.meta.env.BASE_URL;
 type AccentId='indigo'|'oceano'|'floresta'|'aurora';
