@@ -1,0 +1,36 @@
+/* Rede Jovem · comunidade online: formulários acessíveis e carregamento progressivo */
+.online-root .online-auth-links{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:center;margin-top:9px}
+.online-root .online-auth-links .online-switch{margin:10px 0 2px;white-space:normal;text-align:left}
+.online-root .online-secondary-action{display:inline-flex;align-items:center;gap:8px;justify-self:start;align-self:start;border:0;background:transparent;color:var(--online-personal,#3556ba);font-size:.8rem;font-weight:720;padding:5px 0}
+.online-root .online-secondary-action:hover{text-decoration:underline}
+.online-root .online-edit-post,.online-root .online-report-form{display:grid;gap:11px;border-radius:15px;margin:15px 0;padding:15px;background:#f4f7fc;border:1px solid #e1e8f2}
+.online-root :is(.online-edit-post,.online-report-form) label{font-size:.82rem;font-weight:800;color:#34445e}
+.online-root .online-edit-post textarea,.online-root .online-report-form select{display:block;width:100%;min-width:0;border-radius:12px;background:#fff;color:#29344c;border:1px solid #ccd8eb;padding:12px 14px;line-height:1.55;font-size:.85rem}
+.online-root .online-edit-post textarea{resize:vertical;min-height:95px}
+.online-root .online-report-form select{min-height:44px}
+.online-root .online-report-form .online-primary,.online-root .online-edit-post .online-primary{min-height:40px;padding:10px 15px}
+.online-root .online-post-tools{display:flex;align-items:center;gap:6px}
+.online-root .online-comment-content{flex:1;min-width:0}
+.online-root .online-comment-delete{align-self:start;min-width:38px;min-height:38px;padding:9px;flex:none;margin-left:auto}
+.online-root .online-comment-delete:hover{color:#bc3f56}
+.online-root .online-feed-error{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;padding:13px 16px;background:#fff0f2;border:1px solid #f2c3cc;border-radius:15px;color:#892f43;line-height:1.5;font-size:.82rem}
+.online-root .online-pagination{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:17px 0 20px;color:var(--on-muted);font-size:.78rem}
+.online-root .online-pagination .online-ghost{color:var(--online-personal,#3556ba);font-weight:800;border-radius:22px;min-height:44px}
+.online-root .online-comments{max-width:100%;overflow-wrap:anywhere}
+.online-root .online-comment-content{max-width:100%}
+.online-root .online-comment-content p{white-space:pre-wrap}
+.online-root .online-report-form .online-row,.online-root .online-edit-post .online-row{flex-wrap:wrap}
+.online-root .online-form input:focus-visible,.online-root .online-edit-post textarea:focus-visible,.online-root .online-report-form select:focus-visible{outline:3px solid var(--online-personal,#3556ba);outline-offset:2px}
+@media(max-width:580px){
+  .online-root .online-auth-links{flex-direction:column;align-items:flex-start}
+  .online-root .online-report-form,.online-root .online-edit-post{padding:13px 12px}
+  .online-root .online-post-tools{gap:2px}
+  .online-root .online-post-tools .online-icon{padding:7px;min-width:36px;min-height:36px}
+  .online-root .online-feed-error{align-items:flex-start;flex-direction:column}
+  .online-root .online-pagination{flex-direction:column;align-items:stretch}
+  .online-root .online-pagination .online-ghost{width:100%}
+  .online-root .online-comment-delete{width:36px;min-width:36px;min-height:36px;padding:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  .online-root :is(.online-report-form,.online-edit-post,.online-pagination) *{transition:none!important;animation:none!important}
+}

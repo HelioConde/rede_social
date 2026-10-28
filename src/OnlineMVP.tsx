@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Heart, MessageCircle, Send, RefreshCw,
   ShieldCheck, LogOut, Trash2, Flag, Sparkles, Pencil, Check,
-  Users, Search, LockKeyhole
+  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff
 } from 'lucide-react';
 import { createClient, type Session } from '@supabase/supabase-js';
 import './online.css';
@@ -11,7 +11,7 @@ const endpoint = import.meta.env.VITE_SUPABASE_URL?.trim();
 const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
 // Publishable key only. NEVER bundle service_role or secret API keys.
 const api = endpoint && /^https:\/\/[a-z0-9.-]+$/i.test(endpoint) && publishableKey
-  ? createClient(endpoint, publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
+  ? createClient(endpoint, publishableKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' } })
   : null;
 
 export const onlineConfigured = Boolean(api);
@@ -23,11 +23,16 @@ type Comment = { id: string; post_id: string; author_id: string; content: string
 const errorText = (e: unknown) => e instanceof Error ? e.message : 'Ocorreu um erro. Tente novamente.';
 const shortDate = (date: string) => new Date(date).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 const avatar = (name: string) => (name.trim().charAt(0) || '?').toUpperCase();
+const PAGE_SIZE = 20;
+const recoveryMarker = () => new URLSearchParams(window.location.search).get('rj_recovery') === '1';
+type AuthMode = 'login' | 'cadastro' | 'recuperar';
 
 export function OnlineMVP() {
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [mode, setMode] = useState<'login' | 'cadastro'>('login');
+  const [mode, setMode] = useState<AuthMode>('login');
+  const [isRecovery, setIsRecovery] = useState(recoveryMarker);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [people, setPeople] = useState<Person[]>([]);
@@ -35,6 +40,10 @@ export function OnlineMVP() {
   const [likes, setLikes] = useState<Like[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [profileEditing, setProfileEditing] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editPostBody, setEditPostBody] = useState('');
+  const [reportingId, setReportingId] = useState<string | null>(null);
+  const [reportReason, setReportReason] = useState<'spam' | 'abuso' | 'outro'>('spam');
   const [profileName, setProfileName] = useState('');
   const [profileHandle, setProfileHandle] = useState('');
   const [profileBio, setProfileBio] = useState('');
@@ -47,6 +56,9 @@ export function OnlineMVP() {
   const [error, setError] = useState('');
   const [version, setVersion] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [feedError, setFeedError] = useState('');
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const uid = session?.user.id;
   const me = people.find(p => p.id === uid);
   const byId = (id: string) => people.find(p => p.id === id);
@@ -74,37 +86,54 @@ export function OnlineMVP() {
   useEffect(() => {
     if (!api || !uid) {
       setPeople([]); setPosts([]); setLikes([]); setComments([]);
+      setPage(0);setFeedError('');setHasMore(false);
       return;
     }
     const client = api;
     let mounted = true;
     async function fetchFeed() {
       setLoading(true);
+      setFeedError('');
       try {
-        const [p, entries, l, c] = await Promise.all([
-          client.from('rj_profiles').select('id,handle,name,bio,created_at').limit(300),
-          client.from('rj_posts').select('id,author_id,content,created_at').order('created_at', {ascending: false}).limit(100),
-          client.from('rj_likes').select('post_id,user_id').limit(3000),
-          client.from('rj_comments').select('id,post_id,author_id,content,created_at').order('created_at', {ascending: true}).limit(3000)
+        const entries = await client.from('rj_posts')
+          .select('id,author_id,content,created_at')
+          .order('created_at', {ascending:false})
+          .order('id', {ascending:false})
+          .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+        if (entries.error) throw entries.error;
+        const batch = (entries.data || []) as Entry[];
+        const postIds = batch.map(p => p.id);
+        const [l, c] = await Promise.all([
+          postIds.length ? client.from('rj_likes').select('post_id,user_id').in('post_id',postIds).limit(3000) : Promise.resolve({data:[] as Like[],error:null}),
+          postIds.length ? client.from('rj_comments').select('id,post_id,author_id,content,created_at').in('post_id',postIds).order('created_at',{ascending:true}).limit(3000) : Promise.resolve({data:[] as Comment[],error:null})
         ]);
-        const failure = p.error || entries.error || l.error || c.error;
-        if (failure) throw failure;
+        if (l.error || c.error) throw (l.error || c.error);
+        const newLikes = (l.data || []) as Like[];
+        const newComments = (c.data || []) as Comment[];
+        const authorIds = [...new Set([uid,...batch.map(p=>p.author_id),...newComments.map(p=>p.author_id)])];
+        const p = await client.from('rj_profiles').select('id,handle,name,bio,created_at').in('id',authorIds);
+        if(p.error) throw p.error;
+        const newPeople = (p.data || []) as Person[];
         if (mounted) {
-          setPeople((p.data || []) as Person[]);
-          setPosts((entries.data || []) as Entry[]);
-          setLikes((l.data || []) as Like[]);
-          setComments((c.data || []) as Comment[]);
+          setPeople(old => page===0 ? newPeople : [...old,...newPeople.filter(p => !old.some(x => x.id===p.id))]);
+          setPosts(old => page===0 ? batch : [...old,...batch.filter(p => !old.some(x=>x.id===p.id))]);
+          setLikes(old => page===0 ? newLikes : [...old,...newLikes]);
+          setComments(old => page===0 ? newComments : [...old,...newComments]);
+          setHasMore(batch.length === PAGE_SIZE);
           setError('');
         }
       } catch (e) {
-        if (mounted) setError('Falha ao carregar a comunidade: ' + errorText(e));
+        if (mounted) {
+          setFeedError('Não foi possível carregar as publicações. Tente novamente.');
+          setError('Falha ao carregar a comunidade: ' + errorText(e));
+        }
       } finally { if (mounted) setLoading(false); }
     }
     void fetchFeed();
     return () => { mounted = false; };
-  }, [uid, version]);
+  }, [uid, page, version]);
 
-  function refresh() { setVersion(v => v + 1); }
+  function refresh() { setPage(0);setHasMore(false);setVersion(v => v + 1); }
   async function task(key: string, fn: () => Promise<void>) {
     if (busy) return;
     setBusy(key); setError(''); setNotice('');
@@ -116,10 +145,16 @@ export function OnlineMVP() {
 
   async function authenticate(e: React.FormEvent) {
     e.preventDefault();
-    if (!api || password.length < 8) { setError('Informe uma senha de pelo menos 8 caracteres.'); return; }
+    if (!api) return;
+    if (mode !== 'recuperar' && password.length < 8) { setError('Informe uma senha de pelo menos 8 caracteres.'); return; }
     const client = api;
     await task('auth', async () => {
-      if (mode === 'cadastro') {
+      if (mode === 'recuperar') {
+        const redirect = window.location.origin + import.meta.env.BASE_URL + '?rj_recovery=1#comunidade';
+        const {error: resetError} = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), {redirectTo:redirect});
+        if(resetError) throw resetError;
+        setNotice('Se o e-mail estiver cadastrado, você receberá instruções para redefinir a senha.');
+      } else if (mode === 'cadastro') {
         const redirect = window.location.origin + import.meta.env.BASE_URL + '#comunidade';
         const {data, error: authError} = await client.auth.signUp({
           email: email.trim().toLowerCase(), password, options: {emailRedirectTo: redirect}
@@ -133,6 +168,24 @@ export function OnlineMVP() {
         setPassword('');
         setNotice('Bem-vindo à comunidade!');
       }
+    });
+  }
+
+  async function changeRecoveredPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!api || password.length < 8) {
+      setError('Escolha uma senha com pelo menos 8 caracteres.');
+      return;
+    }
+    await task('password-reset', async () => {
+      const {error: updateError} = await api.auth.updateUser({password});
+      if(updateError) throw updateError;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('rj_recovery');
+      window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+      setIsRecovery(false);
+      setPassword('');
+      setNotice('Senha atualizada. Você já pode usar sua conta.');
     });
   }
 
@@ -197,6 +250,27 @@ export function OnlineMVP() {
       refresh();
     });
   }
+  async function updatePost(e: React.FormEvent, postId: string) {
+    e.preventDefault();
+    if (!api || !uid) return;
+    const content = editPostBody.trim();
+    if (!content || content.length > 2000) {setError('A publicação deve ter entre 1 e 2.000 caracteres.');return;}
+    const client=api;
+    await task('edit-'+postId, async () => {
+      const {error: updateError} = await client.from('rj_posts').update({content}).eq('id',postId).eq('author_id',uid);
+      if(updateError) throw updateError;
+      setEditingPostId(null);setNotice('Publicação atualizada.');refresh();
+    });
+  }
+  async function deleteComment(commentId: string) {
+    if(!api || !uid || !window.confirm('Excluir seu comentário?'))return;
+    const client=api;
+    await task('comment-delete-'+commentId,async ()=>{
+      const {error: deleteError} = await client.from('rj_comments').delete().eq('id',commentId).eq('author_id',uid);
+      if(deleteError)throw deleteError;
+      setNotice('Comentário excluído.');refresh();
+    });
+  }
   async function deletePost(postId: string) {
     if (!api || !uid || !window.confirm('Excluir sua publicação permanentemente?')) return;
     const client = api;
@@ -206,16 +280,15 @@ export function OnlineMVP() {
       setNotice('Publicação excluída.'); refresh();
     });
   }
-  async function reportPost(postId: string) {
+  async function reportPost(e: React.FormEvent, postId: string) {
+    e.preventDefault();
     if (!api || !uid) return;
-    const reason = window.prompt('Motivo da denúncia: spam, abuso ou outro', 'spam')?.trim().toLowerCase();
-    if (!reason) return;
-    if (!['spam','abuso','outro'].includes(reason)) { setError('Escolha spam, abuso ou outro.'); return; }
     const client = api;
     await task('report-' + postId, async () => {
-      const {error: saveError} = await client.from('rj_reports').insert({post_id: postId, reporter_id: uid, reason});
+      const {error: saveError} = await client.from('rj_reports').insert({post_id: postId, reporter_id: uid, reason:reportReason});
       if (saveError) throw saveError;
-      setNotice('Denúncia registrada para análise pela administração.');
+      setReportingId(null);
+      setNotice('Denúncia registrada. A equipe responsável precisará analisá-la.');
     });
   }
 
@@ -237,7 +310,7 @@ export function OnlineMVP() {
           <span className="online-kicker"><Users size={16}/> CONECTE IDEIAS, CRIE LAÇOS</span>
           <h1>Uma comunidade para <em>crescer juntos.</em></h1>
           <p>Encontre pessoas, compartilhe conquistas e converse nos comentários. Respeito e boas ideias começam aqui.</p>
-          <div className="online-hero-facts"><span><ShieldCheck size={17}/> Contas protegidas</span><span><Heart size={17}/> Conexões reais</span></div>
+          <div className="online-hero-facts"><span><ShieldCheck size={17}/> Acesso por conta</span><span><Heart size={17}/> Publique e interaja</span></div>
         </div>
         <div className="online-hero-decoration" aria-hidden="true"><span>✦</span><span>♥</span><span>✧</span></div>
       </div>
@@ -248,16 +321,31 @@ export function OnlineMVP() {
         <p className="online-small">Nenhuma senha ou banco de outro projeto será usado automaticamente.</p>
         <a href="https://github.com/HelioConde/rede_social/blob/gh-pages/docs/MVP_ONLINE.md" target="_blank" rel="noopener noreferrer" className="online-primary">Como ativar o MVP</a>
       </section> : authLoading ? <div className="online-panel" role="status">Conectando à comunidade...</div>
+      : isRecovery && session ? <section className="online-auth online-panel" aria-label="Redefinir senha">
+        <div className="online-auth-intro"><span className="online-kicker"><KeyRound size={15}/> SEGURANÇA DA CONTA</span><h2>Crie sua nova senha</h2><p>Escolha uma senha de pelo menos oito caracteres.</p></div>
+        <form onSubmit={changeRecoveredPassword} className="online-form">
+          <label>Nova senha<input type={showPassword?'text':'password'} value={password} required minLength={8} autoComplete="new-password" onChange={e=>setPassword(e.target.value)}/></label>
+          <button className="online-secondary-action" type="button" onClick={()=>setShowPassword(v=>!v)}>{showPassword?<EyeOff size={17}/>:<Eye size={17}/>} {showPassword?'Ocultar senha':'Mostrar senha'}</button>
+          <button type="submit" className="online-primary" disabled={!!busy}>{busy==='password-reset'?'Atualizando...':'Salvar nova senha'}</button>
+        </form>
+      </section>
       : !session ? <section className="online-auth online-panel" aria-label="Acessar comunidade">
-        <div className="online-auth-intro"><span className="online-kicker">SEU PRÓXIMO CAPÍTULO</span><h2>{mode === 'login' ? 'Que bom ter você de volta!' : 'Sua história começa aqui.'}</h2><p>{mode === 'login' ? 'Entre para acompanhar as publicações de outras pessoas.' : 'Crie uma conta para publicar e participar.'}</p></div>
+        <div className="online-auth-intro"><span className="online-kicker">SEU PRÓXIMO CAPÍTULO</span><h2>{mode==='login'?'Bem-vindo de volta!':mode==='cadastro'?'Sua história começa aqui.':'Recuperar acesso'}</h2><p>{mode==='login'?'Acesse as publicações e conversas da comunidade.':mode==='cadastro'?'Crie uma conta para publicar e participar.':'Informe seu e-mail para receber instruções de redefinição de senha.'}</p></div>
         <form onSubmit={authenticate} className="online-form">
           <label>E-mail<input type="email" value={email} required autoComplete="email" maxLength={254} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com"/></label>
-          <label>Senha<input type="password" value={password} required minLength={8} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} onChange={e => setPassword(e.target.value)} placeholder="Pelo menos 8 caracteres"/></label>
-          <button className="online-primary" type="submit" disabled={!!busy}>{busy === 'auth' ? 'Aguarde...' : mode === 'login' ? 'Entrar na comunidade' : 'Criar minha conta'}</button>
+          {mode!=='recuperar'&&<>
+            <label>Senha<input type={showPassword?'text':'password'} value={password} required minLength={8} autoComplete={mode==='login'?'current-password':'new-password'} onChange={e=>setPassword(e.target.value)} placeholder="Pelo menos 8 caracteres"/></label>
+            <button type="button" className="online-secondary-action" onClick={()=>setShowPassword(v=>!v)}>{showPassword?<EyeOff size={17}/>:<Eye size={17}/>} {showPassword?'Ocultar senha':'Mostrar senha'}</button>
+          </>}
+          <button className="online-primary" type="submit" disabled={!!busy}>{busy==='auth'?'Aguarde...':mode==='login'?'Entrar na comunidade':mode==='cadastro'?'Criar minha conta':'Enviar instruções'}</button>
         </form>
-        <button className="online-switch" type="button" onClick={() => {setMode(mode === 'login' ? 'cadastro' : 'login'); setError(''); setNotice('');}}>{mode === 'login' ? 'Ainda não tem conta? Cadastre-se' : 'Já tem uma conta? Entrar'}</button>
+        <div className="online-auth-links">
+          <button className="online-switch" type="button" onClick={()=>{setMode(mode==='login'?'cadastro':'login');setError('');setNotice('');}}>{mode==='login'?'Ainda não tem conta? Cadastre-se':'Já tem uma conta? Entrar'}</button>
+          {mode==='login'&&<button className="online-switch" type="button" onClick={()=>{setMode('recuperar');setError('');setNotice('');}}>Esqueci minha senha</button>}
+        </div>
         <p className="online-small">Ao participar, respeite as outras pessoas. Nunca compartilhe dados sensíveis ou informações de terceiros.</p>
       </section> : loading && !me && people.length === 0 ? <div className="online-panel" role="status">Carregando perfil e publicações...</div>
+      : feedError && !me ? <section className="online-panel online-onboard" role="alert"><h2>Não conseguimos carregar seu perfil</h2><p>{feedError}</p><button className="online-primary" onClick={refresh}><RefreshCw size={16}/> Tentar novamente</button></section>
       : !me || profileEditing ? <section className="online-panel online-onboard">
         <span className="online-kicker">PERFIL DA COMUNIDADE</span><h2>{me ? 'Editar meu perfil' : 'Como podemos chamar você?'}</h2>
         <p>Escolha como você vai aparecer nas publicações. Seu nome de usuário é público.</p>
@@ -279,7 +367,8 @@ export function OnlineMVP() {
             <div className="online-compose-foot"><small>{draft.length}/2000 caracteres</small><button className="online-primary" type="submit" disabled={!!busy || !draft.trim()}><Send size={17}/> Publicar</button></div>
           </form>
           <div className="online-feed-bar"><div><h2>Conversa da comunidade</h2><p>Publicações visíveis para participantes conectados</p></div><button onClick={refresh} className="online-ghost" aria-label="Atualizar publicações" disabled={loading}><RefreshCw size={18}/></button></div>
-          <div className="online-filter"><label className="online-search"><Search size={17}/><input aria-label="Buscar publicações online" placeholder="Buscar publicações..." value={search} onChange={e => setSearch(e.target.value)}/></label><button aria-pressed={filter === 'recentes'} onClick={() => setFilter('recentes')} className={filter === 'recentes' ? 'active' : ''}>Recentes</button><button aria-pressed={filter === 'meus'} onClick={() => setFilter('meus')} className={filter === 'meus' ? 'active' : ''}>Minhas</button></div>
+          {feedError&&<div className="online-feed-error" role="alert"><span>{feedError}</span><button className="online-ghost" onClick={refresh}>Tentar novamente</button></div>}
+          <div className="online-filter"><label className="online-search"><Search size={17}/><input aria-label="Buscar publicações online" placeholder="Buscar publicações carregadas..." value={search} onChange={e => setSearch(e.target.value)}/></label><button aria-pressed={filter === 'recentes'} onClick={() => setFilter('recentes')} className={filter === 'recentes' ? 'active' : ''}>Recentes</button><button aria-pressed={filter === 'meus'} onClick={() => setFilter('meus')} className={filter === 'meus' ? 'active' : ''}>Minhas</button></div>
           {visiblePosts.length ? visiblePosts.map(post => {
             const owner = byId(post.author_id);
             const related = comments.filter(c => c.post_id === post.id);
@@ -287,14 +376,35 @@ export function OnlineMVP() {
             const liked = likes.some(l => l.post_id === post.id && l.user_id === uid);
             return <article className="online-panel online-post" data-testid="online-post" key={post.id}>
               <div className="online-post-top"><div className="online-avatar">{avatar(owner?.name || '?')}</div><div className="online-post-person"><strong>{owner?.name || 'Participante'}</strong><span>@{owner?.handle || 'usuario'} · <time dateTime={post.created_at}>{shortDate(post.created_at)}</time></span></div>
-              {post.author_id === uid ? <button className="online-icon danger" aria-label="Excluir minha publicação" title="Excluir publicação" onClick={() => void deletePost(post.id)} disabled={!!busy}><Trash2 size={17}/></button> : <button className="online-icon" aria-label="Denunciar publicação" title="Denunciar publicação" onClick={() => void reportPost(post.id)} disabled={!!busy}><Flag size={17}/></button>}
+              {post.author_id===uid ? <div className="online-post-tools">
+                <button className="online-icon" aria-label="Editar minha publicação" title="Editar publicação" onClick={()=>{setEditingPostId(post.id);setEditPostBody(post.content)}} disabled={!!busy}><Pencil size={17}/></button>
+                <button className="online-icon danger" aria-label="Excluir minha publicação" title="Excluir publicação" onClick={()=>void deletePost(post.id)} disabled={!!busy}><Trash2 size={17}/></button>
+              </div> : <button className="online-icon" aria-label="Denunciar publicação" title="Denunciar publicação" onClick={()=>{setReportingId(reportingId===post.id?null:post.id);setReportReason('spam')}} disabled={!!busy}><Flag size={17}/></button>}
               </div>
-              <p className="online-post-body">{post.content}</p>
+              {editingPostId===post.id ? <form className="online-edit-post" onSubmit={e=>void updatePost(e,post.id)}>
+                <label htmlFor={'edit-post-'+post.id}>Editar publicação</label>
+                <textarea id={'edit-post-'+post.id} maxLength={2000} required value={editPostBody} onChange={e=>setEditPostBody(e.target.value)} rows={3}/>
+                <div className="online-row"><button className="online-primary" type="submit" disabled={!!busy||!editPostBody.trim()}><Check size={16}/> Salvar alterações</button><button type="button" className="online-ghost" onClick={()=>setEditingPostId(null)}>Cancelar</button></div>
+              </form> : <p className="online-post-body">{post.content}</p>}
+              {reportingId===post.id&&<form className="online-report-form" onSubmit={e=>void reportPost(e,post.id)}>
+                <label htmlFor={'report-'+post.id}>Motivo da denúncia</label>
+                <select id={'report-'+post.id} value={reportReason} onChange={e=>setReportReason(e.target.value as 'spam'|'abuso'|'outro')}>
+                  <option value="spam">Spam</option><option value="abuso">Abuso ou assédio</option><option value="outro">Outro motivo</option>
+                </select>
+                <div className="online-row"><button type="submit" className="online-primary" disabled={!!busy}><Flag size={16}/> Enviar denúncia</button><button type="button" className="online-ghost" onClick={()=>setReportingId(null)}>Cancelar</button></div>
+              </form>}
               <div className="online-post-actions"><button aria-pressed={liked} className={liked ? 'liked' : ''} onClick={() => void toggleLike(post.id)} disabled={!!busy}><Heart size={19} fill={liked ? 'currentColor' : 'none'}/> {count} curtidas</button><span><MessageCircle size={19}/> {related.length} comentários</span></div>
-              {related.length > 0 && <div className="online-comments">{related.map(c => <div key={c.id} className="online-comment"><div className="online-avatar small">{avatar(byId(c.author_id)?.name || '?')}</div><div><strong>{byId(c.author_id)?.name || 'Participante'}</strong><p>{c.content}</p></div></div>)}</div>}
+              {related.length > 0 && <div className="online-comments">{related.map(c => <div key={c.id} className="online-comment"><div className="online-avatar small">{avatar(byId(c.author_id)?.name || '?')}</div><div className="online-comment-content"><strong>{byId(c.author_id)?.name || 'Participante'}</strong><p>{c.content}</p></div>
+                  {c.author_id===uid&&<button className="online-icon danger online-comment-delete" aria-label="Excluir meu comentário" title="Excluir meu comentário" disabled={!!busy} onClick={()=>void deleteComment(c.id)}><Trash2 size={15}/></button>}
+                </div>)}</div>}
               <form onSubmit={e => void addComment(e, post.id)} className="online-comment-form"><input aria-label="Comentário na publicação online" maxLength={500} placeholder="Escreva um comentário..." value={commentDraft[post.id] || ''} onChange={e => setCommentDraft(v => ({...v, [post.id]: e.target.value}))}/><button type="submit" disabled={!!busy || !commentDraft[post.id]?.trim()} aria-label="Enviar comentário online"><Send size={18}/></button></form>
             </article>;
-          }) : <div className="online-panel online-empty"><MessageCircle size={27}/><h3>Nenhuma publicação por aqui ainda</h3><p>Que tal começar uma boa conversa?</p></div>}
+          }) : <div className="online-panel online-empty"><MessageCircle size={27}/><h3>{search?'Nenhum resultado entre as publicações carregadas':'Nenhuma publicação por aqui ainda'}</h3><p>{search?'Tente outra busca ou carregue outras publicações.':'Que tal começar uma boa conversa?'}</p></div>}
+          <div className="online-pagination">
+            <span>{posts.length} publicações carregadas</span>
+            {loading && <span role="status">Carregando publicações...</span>}
+            {hasMore && <button type="button" className="online-ghost" onClick={()=>setPage(p=>p+1)} disabled={loading||!!busy}>Carregar mais publicações</button>}
+          </div>
         </section>
       </div>}
       {notice && <div className="online-feedback" role="status"><Check size={17}/>{notice}<button aria-label="Fechar aviso" onClick={() => setNotice('')}>×</button></div>}
