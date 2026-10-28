@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Heart, MessageCircle, Send, RefreshCw,
   ShieldCheck, LogOut, Trash2, Flag, Sparkles, Pencil, Check,
-  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff
+  Users, Search, LockKeyhole, KeyRound, Eye, EyeOff, UserX, UserCheck
 } from 'lucide-react';
 import { createClient, type Session } from '@supabase/supabase-js';
 import './online.css';
@@ -36,6 +36,10 @@ export function OnlineMVP() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [people, setPeople] = useState<Person[]>([]);
+  const [mutedIds, setMutedIds] = useState<string[]>([]);
+  const [mutedProfiles, setMutedProfiles] = useState<Person[]>([]);
+  const [mutesReady, setMutesReady] = useState(false);
+  const [mutesError, setMutesError] = useState('');
   const [posts, setPosts] = useState<Entry[]>([]);
   const [likes, setLikes] = useState<Like[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -64,9 +68,10 @@ export function OnlineMVP() {
   const byId = (id: string) => people.find(p => p.id === id);
   const ownPosts = useMemo(() => posts.filter(p => p.author_id === uid).length, [posts, uid]);
   const visiblePosts = useMemo(() => posts.filter(p =>
+    !mutedIds.includes(p.author_id) &&
     (filter !== 'meus' || p.author_id === uid) &&
     (!search.trim() || (p.content + ' ' + (people.find(u => u.id === p.author_id)?.name || '')).toLocaleLowerCase('pt-BR').includes(search.trim().toLocaleLowerCase('pt-BR')))
-  ), [posts, people, search, filter, uid]);
+  ), [posts, people, mutedIds, search, filter, uid]);
 
   useEffect(() => {
     if (!api) { setAuthLoading(false); return; }
@@ -132,6 +137,34 @@ export function OnlineMVP() {
     void fetchFeed();
     return () => { mounted = false; };
   }, [uid, page, version]);
+
+  useEffect(()=>{
+    if(!api || !uid){
+      setMutedIds([]);setMutedProfiles([]);setMutesReady(false);setMutesError('');
+      return;
+    }
+    let active=true;
+    const client=api;
+    async function loadMutes(){
+      const {data,error:mutesFailure}=await client.from('rj_mutes')
+        .select('muted_id').eq('owner_id',uid).limit(500);
+      if(!active)return;
+      if(mutesFailure){
+        setMutesReady(false);
+        setMutesError('Silenciar pessoas requer a atualização de segurança do banco.');
+        return;
+      }
+      const ids=(data||[]).map(x=>x.muted_id as string);
+      setMutedIds(ids);setMutesReady(true);setMutesError('');
+      if(!ids.length){setMutedProfiles([]);return;}
+      const {data:profiles,error:profilesFailure}=await client.from('rj_profiles')
+        .select('id,handle,name,bio,created_at').in('id',ids);
+      if(!active)return;
+      if(!profilesFailure)setMutedProfiles((profiles||[]) as Person[]);
+    }
+    void loadMutes();
+    return ()=>{active=false};
+  },[uid,version]);
 
   function refresh() { setPage(0);setHasMore(false);setVersion(v => v + 1); }
   async function task(key: string, fn: () => Promise<void>) {
@@ -280,6 +313,26 @@ export function OnlineMVP() {
       setNotice('Publicação excluída.'); refresh();
     });
   }
+  async function toggleMute(personId:string){
+    if(!api || !uid || !mutesReady || personId===uid)return;
+    const client=api;
+    const alreadyMuted=mutedIds.includes(personId);
+    await task('mute-'+personId,async()=>{
+      const response=alreadyMuted
+        ? await client.from('rj_mutes').delete().eq('owner_id',uid).eq('muted_id',personId)
+        : await client.from('rj_mutes').insert({owner_id:uid,muted_id:personId});
+      if(response.error)throw response.error;
+      if(alreadyMuted){
+        setMutedIds(prev=>prev.filter(x=>x!==personId));
+        setMutedProfiles(prev=>prev.filter(x=>x.id!==personId));
+      }else{
+        setMutedIds(prev=>[...prev,personId]);
+        const person=people.find(x=>x.id===personId);
+        if(person)setMutedProfiles(prev=>[...prev.filter(x=>x.id!==personId),person]);
+      }
+      setNotice(alreadyMuted?'Pessoa removida da lista de silenciados.':'Publicações desta pessoa serão ocultadas deste feed.');
+    });
+  }
   async function reportPost(e: React.FormEvent, postId: string) {
     e.preventDefault();
     if (!api || !uid) return;
@@ -358,7 +411,16 @@ export function OnlineMVP() {
       </section> : <div className="online-layout">
         <aside className="online-about">
           <div className="online-panel online-identity"><div className="online-avatar large">{avatar(me.name)}</div><h2>{me.name}</h2><span>@{me.handle}</span><p>{me.bio || 'Faça sua apresentação para a comunidade.'}</p><div className="online-stats"><strong>{ownPosts}</strong><span>Publicações</span></div><button className="online-ghost" onClick={startProfile}><Pencil size={16}/> Editar perfil</button></div>
-          <div className="online-panel online-rules"><ShieldCheck size={22}/><h3>Um espaço de respeito</h3><p>Não publique informações privadas. Denuncie conteúdos ofensivos ou spam. Denúncias são analisadas manualmente.</p><span className="online-small">MVP · Acesso autenticado · Sem mensagens privadas nesta fase</span></div>
+          <div className="online-panel online-rules"><ShieldCheck size={22}/><h3>Um espaço de respeito</h3><p>Evite dados pessoais. Denuncie conteúdo ofensivo ou spam; a equipe precisará analisar as denúncias manualmente.</p><span className="online-small">MVP · Acesso autenticado · Sem mensagens privadas nesta fase</span></div>
+          <div className="online-panel online-muted-list">
+            <div className="online-muted-head"><UserX size={19}/><h3>Pessoas silenciadas</h3></div>
+            {mutesError?<p className="online-small" role="status">{mutesError}</p>:mutedIds.length===0?<p className="online-small">{mutesReady?'Você não silenciou ninguém.':'Carregando preferências...'}</p>
+              :<div className="online-muted-items">{mutedIds.map(id=>{
+                const person=mutedProfiles.find(p=>p.id===id) || people.find(p=>p.id===id);
+                return <div className="online-muted-item" key={id}><span>{person?.name || 'Pessoa silenciada'}</span><button className="online-ghost" type="button" aria-label={'Reexibir '+(person?.name||'pessoa')} disabled={!!busy} onClick={()=>void toggleMute(id)}><UserCheck size={15}/> Reexibir</button></div>;
+              })}</div>}
+            <p className="online-small">Silenciar apenas oculta publicações neste feed. Não impede contatos por outros meios e não substitui uma denúncia.</p>
+          </div>
         </aside>
         <section className="online-feed" aria-label="Publicações da comunidade">
           <form className="online-panel online-compose" onSubmit={publish}>
@@ -366,7 +428,7 @@ export function OnlineMVP() {
             <textarea value={draft} onChange={e => setDraft(e.target.value)} maxLength={2000} rows={3} aria-label="Escrever publicação online" placeholder="Uma novidade, conquista ou ideia para compartilhar..."/>
             <div className="online-compose-foot"><small>{draft.length}/2000 caracteres</small><button className="online-primary" type="submit" disabled={!!busy || !draft.trim()}><Send size={17}/> Publicar</button></div>
           </form>
-          <div className="online-feed-bar"><div><h2>Conversa da comunidade</h2><p>Publicações visíveis para participantes conectados</p></div><button onClick={refresh} className="online-ghost" aria-label="Atualizar publicações" disabled={loading}><RefreshCw size={18}/></button></div>
+          <div className="online-feed-bar"><div><h2>Conversa da comunidade</h2><p>Publicações visíveis para participantes conectados{mutedIds.length?' · pessoas silenciadas ocultadas':''}</p></div><button onClick={refresh} className="online-ghost" aria-label="Atualizar publicações" disabled={loading}><RefreshCw size={18}/></button></div>
           {feedError&&<div className="online-feed-error" role="alert"><span>{feedError}</span><button className="online-ghost" onClick={refresh}>Tentar novamente</button></div>}
           <div className="online-filter"><label className="online-search"><Search size={17}/><input aria-label="Buscar publicações online" placeholder="Buscar publicações carregadas..." value={search} onChange={e => setSearch(e.target.value)}/></label><button aria-pressed={filter === 'recentes'} onClick={() => setFilter('recentes')} className={filter === 'recentes' ? 'active' : ''}>Recentes</button><button aria-pressed={filter === 'meus'} onClick={() => setFilter('meus')} className={filter === 'meus' ? 'active' : ''}>Minhas</button></div>
           {visiblePosts.length ? visiblePosts.map(post => {
@@ -379,7 +441,10 @@ export function OnlineMVP() {
               {post.author_id===uid ? <div className="online-post-tools">
                 <button className="online-icon" aria-label="Editar minha publicação" title="Editar publicação" onClick={()=>{setEditingPostId(post.id);setEditPostBody(post.content)}} disabled={!!busy}><Pencil size={17}/></button>
                 <button className="online-icon danger" aria-label="Excluir minha publicação" title="Excluir publicação" onClick={()=>void deletePost(post.id)} disabled={!!busy}><Trash2 size={17}/></button>
-              </div> : <button className="online-icon" aria-label="Denunciar publicação" title="Denunciar publicação" onClick={()=>{setReportingId(reportingId===post.id?null:post.id);setReportReason('spam')}} disabled={!!busy}><Flag size={17}/></button>}
+              </div> : <div className="online-post-tools">
+                  {mutesReady&&<button className="online-icon" aria-label={'Silenciar '+(owner?.name||'pessoa')} title="Ocultar publicações desta pessoa" onClick={()=>void toggleMute(post.author_id)} disabled={!!busy}><UserX size={17}/></button>}
+                  <button className="online-icon" aria-label="Denunciar publicação" title="Denunciar publicação" onClick={()=>{setReportingId(reportingId===post.id?null:post.id);setReportReason('spam')}} disabled={!!busy}><Flag size={17}/></button>
+                </div>}
               </div>
               {editingPostId===post.id ? <form className="online-edit-post" onSubmit={e=>void updatePost(e,post.id)}>
                 <label htmlFor={'edit-post-'+post.id}>Editar publicação</label>
@@ -400,6 +465,7 @@ export function OnlineMVP() {
               <form onSubmit={e => void addComment(e, post.id)} className="online-comment-form"><input aria-label="Comentário na publicação online" maxLength={500} placeholder="Escreva um comentário..." value={commentDraft[post.id] || ''} onChange={e => setCommentDraft(v => ({...v, [post.id]: e.target.value}))}/><button type="submit" disabled={!!busy || !commentDraft[post.id]?.trim()} aria-label="Enviar comentário online"><Send size={18}/></button></form>
             </article>;
           }) : <div className="online-panel online-empty"><MessageCircle size={27}/><h3>{search?'Nenhum resultado entre as publicações carregadas':'Nenhuma publicação por aqui ainda'}</h3><p>{search?'Tente outra busca ou carregue outras publicações.':'Que tal começar uma boa conversa?'}</p></div>}
+          {mutedIds.length>0&&<p className="online-muted-footnote"><UserX size={15}/> Você ocultou publicações de {mutedIds.length} {mutedIds.length===1?'pessoa':'pessoas'}.</p>}
           <div className="online-pagination">
             <span>{posts.length} publicações carregadas</span>
             {loading && <span role="status">Carregando publicações...</span>}
