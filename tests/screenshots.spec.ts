@@ -34,17 +34,16 @@ test('capturas do novo modo escuro em desktop e mobile',async ({page})=>{
   for(const width of [390,1280]){
     await page.setViewportSize({width,height:width<700?844:900});
     await page.goto('/rede_social/#feed');
-    const toggle=width<600
-      ? page.getByRole('button',{name:'Abrir menu'})
-      : page.getByRole('button',{name:'Ativar modo escuro'});
-    if(width<600){
-      await toggle.click();
-      await page.getByRole('navigation',{name:'Navegação principal'})
-        .getByRole('button',{name:'Configurações'}).click();
-      await page.getByRole('button',{name:'Alternar tema'}).click();
-      await page.goto('/rede_social/#feed');
-    } else {
-      await toggle.click();
+    if(await page.locator('html').getAttribute('data-theme') !== 'dark'){
+      if(width<600){
+        await page.getByRole('button',{name:'Abrir menu'}).click();
+        await page.getByRole('navigation',{name:'Navegação principal'})
+          .getByRole('button',{name:'Configurações'}).click();
+        await page.getByRole('button',{name:'Alternar tema'}).click();
+        await page.goto('/rede_social/#feed');
+      } else {
+        await page.getByRole('button',{name:'Ativar modo escuro'}).click();
+      }
     }
     await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
     const dest=join('test-results','screenshots');
