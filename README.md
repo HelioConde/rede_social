@@ -47,3 +47,9 @@ Consulte `docs/DESIGN_SYSTEM.md` para design e acessibilidade e `docs/MARKET_RES
 O Espaço Fé recebeu busca por referências e assuntos, seis reflexões adicionais e três planos opcionais de sete etapas (paz, esperança e coragem). Marcação de leitura e retomada funcionam pelo armazenamento local e pelos backups JSON já existentes. Não há contagem de dias consecutivos nem contas reais.
 
 Veja `docs/RESEARCH_RELIGIOUS_DIGITAL_2026.md` para as fontes do YouVersion, Pew e W3C. Os percentuais de apps bíblicos descrevem seus usuários, não a população geral.
+
+## MVP online (em ativação)
+
+A rota [**#comunidade**](https://helioconde.github.io/rede_social/#comunidade) já está implementada com autenticação, feed compartilhado, curtidas, comentários, perfil e denúncias via Supabase. **O ambiente online só será ativado quando um projeto Supabase exclusivo da Rede Jovem for configurado.** Enquanto isso, continua disponível a demonstração local.
+
+Leia [docs/MVP_ONLINE.md](docs/MVP_ONLINE.md) para SQL, variáveis públicas, RLS, configuração do e-mail e checklist de segurança. O script está em [supabase/rede_jovem_mvp.sql](supabase/rede_jovem_mvp.sql). Não reutilize o projeto de banco de outro aplicativo.
