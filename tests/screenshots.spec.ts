@@ -28,3 +28,28 @@ test('respeita preferência de movimento reduzido',async ({page})=>{
   const duration=await page.locator('.side-link').first().evaluate(el=>parseFloat(getComputedStyle(el).transitionDuration));
   expect(duration).toBeLessThanOrEqual(0.001);
 });
+
+
+test('capturas do novo modo escuro em desktop e mobile',async ({page})=>{
+  for(const width of [390,1280]){
+    await page.setViewportSize({width,height:width<700?844:900});
+    await page.goto('/rede_social/#feed');
+    const toggle=width<600
+      ? page.getByRole('button',{name:'Abrir menu'})
+      : page.getByRole('button',{name:'Ativar modo escuro'});
+    if(width<600){
+      await toggle.click();
+      await page.getByRole('navigation',{name:'Navegação principal'})
+        .getByRole('button',{name:'Configurações'}).click();
+      await page.getByRole('button',{name:'Alternar tema'}).click();
+      await page.goto('/rede_social/#feed');
+    } else {
+      await toggle.click();
+    }
+    await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+    const dest=join('test-results','screenshots');
+    mkdirSync(dest,{recursive:true});
+    await page.screenshot({path:join(dest,'feed-dark-'+width+'.png'),fullPage:true,animations:'disabled'});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth)).toBeLessThanOrEqual(1);
+  }
+});
