@@ -6,7 +6,7 @@ test('menu lateral mobile fecha com Escape e devolve foco ao botão', async ({pa
   const menu=page.getByRole('button',{name:'Abrir menu'});
   await expect(menu).toBeVisible();
   await menu.click();
-  const close=page.getByRole('button',{name:'Fechar menu'});
+  const close=page.getByRole('banner').getByRole('button',{name:'Fechar menu'});
   await expect(close).toHaveAttribute('aria-expanded','true');
   await page.keyboard.press('Escape');
   await expect(menu).toHaveAttribute('aria-expanded','false');
