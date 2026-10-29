@@ -84,6 +84,8 @@ function App(){
   const [savingError,setSavingError]=useState(false);
   const [filter,setFilter]=useState<'all'|'friends'|'saved'>('all');
   const [feedOrder,setFeedOrder]=useState<'recent'|'popular'>('recent');
+  const menuButtonRef=useRef<HTMLButtonElement>(null);
+  const mobileSearchButtonRef=useRef<HTMLButtonElement>(null);
   const uploadInput=useRef<HTMLInputElement>(null);
   const backupInput=useRef<HTMLInputElement>(null);
   const me=data.profiles.find(p=>p.id===data.activeId)||data.profiles[0];
@@ -117,6 +119,19 @@ function App(){
     addEventListener('hashchange',onHash);return ()=>removeEventListener('hashchange',onHash);
   },[]);
   useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return ()=>clearTimeout(t)},[toast]);
+  // Escape closes the topmost temporary UI without discarding drafts.
+  // Return keyboard focus to the mobile trigger if its panel disappears.
+  useEffect(()=>{
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key!=='Escape')return;
+      if(sidebar){setSidebar(false);menuButtonRef.current?.focus();return}
+      if(notify){setNotify(false);return}
+      if(mobileSearch){setMobileSearch(false);mobileSearchButtonRef.current?.focus();return}
+      if(chatIds.length){setChatIds([])}
+    };
+    window.addEventListener('keydown',onKeyDown);
+    return ()=>window.removeEventListener('keydown',onKeyDown);
+  },[sidebar,notify,mobileSearch,chatIds.length]);
   function go(to:Section){location.hash=to;setSection(to);setSidebar(false);window.scrollTo({top:0})}
   function update(fn:(prev:SocialData)=>SocialData){setData(fn)}
   function feedback(message:string){setToast(message)}
@@ -287,21 +302,21 @@ function App(){
   return <div className="app-shell">
     <a href="#main" className="skip-link">Pular para conteúdo</a>
     <header className={"topbar "+(mobileSearch?"search-open":"")}>
-      <button className="icon-btn hamburger" aria-label="Abrir menu" aria-expanded={sidebar} onClick={()=>setSidebar(v=>!v)}><Menu size={22}/></button>
+      <button ref={menuButtonRef} className="icon-btn hamburger" aria-label={sidebar?'Fechar menu':'Abrir menu'} aria-controls="navegacao-lateral" aria-expanded={sidebar} onClick={()=>setSidebar(v=>!v)}><Menu size={22}/></button>
       <button className="brand-btn" onClick={()=>go('feed')} aria-label="Rede Jovem, início"><Logo/></button>
-      <div className={"top-search "+(mobileSearch?"expanded":"")}><Search className="search-desktop-icon" size={19}/><button className="mobile-search-btn icon-btn" aria-label={mobileSearch?"Fechar busca":"Abrir busca"} aria-expanded={mobileSearch} onClick={()=>setMobileSearch(v=>!v)}>{mobileSearch?<X size={19}/>:<Search size={19}/>}</button><input aria-label="Pesquisar pessoas e publicações" placeholder="Pesquisar na Rede Jovem" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Limpar busca" onClick={()=>setSearch('')}><X size={15}/></button>}</div>
+      <div className={"top-search "+(mobileSearch?"expanded":"")}><Search className="search-desktop-icon" size={19}/><button ref={mobileSearchButtonRef} className="mobile-search-btn icon-btn" aria-label={mobileSearch?"Fechar busca":"Abrir busca"} aria-expanded={mobileSearch} onClick={()=>setMobileSearch(v=>!v)}>{mobileSearch?<X size={19}/>:<Search size={19}/>}</button><input aria-label="Pesquisar pessoas e publicações" placeholder="Pesquisar na Rede Jovem" value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button className="icon-btn" aria-label="Limpar busca" onClick={()=>setSearch('')}><X size={15}/></button>}</div>
       <div className="top-actions">
         <Pill><ShieldCheck size={14}/> Modo demonstração</Pill>
         <button className="icon-btn top-personalize" aria-label="Personalizar cores" title="Personalizar cores" onClick={()=>go('settings')}><Palette size={20}/></button>
         <button className="icon-btn top-theme" aria-label={theme==='dark'?'Ativar modo claro':'Ativar modo escuro'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={20}/>:<Moon size={20}/>}</button>
         <div className="notify-wrap"><button className="icon-btn notification-btn" aria-label="Notificações" aria-expanded={notify} onClick={()=>setNotify(v=>!v)}><Bell size={20}/>{incoming>0&&<span className="count">{incoming}</span>}</button>
-          {notify&&<div className="notify-panel card"><strong>Notificações</strong><p>{incoming? `Você tem ${incoming} solicitação(ões) demonstrativa(s).`:'Nenhuma nova notificação.'}</p><button className="btn secondary" onClick={()=>{setNotify(false);go('friends')}}>Ver amizades</button></div>}
+          {notify&&<div className="notify-panel card" role="region" aria-label="Resumo de notificações"><strong>Notificações</strong><p>{incoming? `Você tem ${incoming} solicitação(ões) demonstrativa(s).`:'Nenhuma nova notificação.'}</p><button className="btn secondary" onClick={()=>{setNotify(false);go('friends')}}>Ver amizades</button></div>}
         </div>
         <button className="top-user" onClick={()=>go('profile')} title="Meu perfil"><Avatar profile={me} size="sm"/><span>{me.name.split(' ')[0]}</span><ChevronDown size={14}/></button>
       </div>
     </header>
     <div className="layout">
-      <aside className={'sidebar '+(sidebar?'open':'')} aria-label="Navegação principal">
+      <aside id="navegacao-lateral" className={'sidebar '+(sidebar?'open':'')} aria-label="Navegação principal">
         <div className="sidebar-profile"><Avatar profile={me} size="lg"/><div><strong>{me.name}</strong><span>@{me.handle}</span></div></div>
         <nav className="side-links" aria-label="Navegação principal"><a className="side-link" href="#comunidade"><Users size={20}/><span>Comunidade online</span></a>{NAV.map(item=><button key={item.id} onClick={()=>go(item.id)} className={'side-link '+(section===item.id?'active':'')} aria-current={section===item.id?'page':undefined}><item.icon size={20}/><span>{item.label}</span>{item.id==='friends'&&incoming>0&&<span className="nav-count">{incoming}</span>}</button>)}</nav>
         <div className="side-bottom"><div className="side-hint"><Sparkles size={18}/><div><strong>Seu espaço, suas ideias</strong><p>Experimente sem criar conta. Tudo fica neste navegador.</p></div></div><span className="sidebar-footer">Rede Jovem · Experiência local</span></div>
